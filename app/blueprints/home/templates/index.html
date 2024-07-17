@@ -1,12 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página de Inicio</title>
-</head>
-<body>
-    <h1>Bienvenido a la Página de Inicio</h1>
-    <p>Esta es la página de inicio de tu aplicación Flask.</p>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Página de Inicio{% endblock %}
+
+{% block content %}
+<div id="carouselExampleSlidesOnly" class="carousel slide" data-ride="carousel">
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="{{ url_for('static', filename='images/imagen1.png') }}" class="d-block w-100" alt="Urna de votacion">
+        </div>
+        <div class="carousel-item">
+            <img src="{{ url_for('static', filename='images/imagen2.jpg') }}" class="d-block w-100" alt="Fechas de las elecciones">
+        </div>
+    </div>
+</div>
+{% endblock %}
