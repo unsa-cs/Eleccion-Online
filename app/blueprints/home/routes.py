@@ -25,6 +25,10 @@ def login():
 def register():
     return render_template('register.html')
 
+@home_bp.route('/listas')
+def listas():
+    return render_template('listas.html')
+
 @home_bp.route('/electores', methods=['POST'])
 def crear_elector():
     try:
