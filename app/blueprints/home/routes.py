@@ -9,6 +9,8 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+REGISTER_TEMPLATE = 'register.html'
+
 home_bp = Blueprint('home_bp', __name__, template_folder='templates')
 
 elector_service = ElectorServiceImpl()
@@ -23,7 +25,7 @@ def login():
 
 @home_bp.route('/register')
 def register():
-    return render_template('register.html')
+    return render_template(REGISTER_TEMPLATE)
 
 @home_bp.route('/electores', methods=['POST'])
 def crear_elector():
@@ -41,11 +43,11 @@ def crear_elector():
         elector_creado = elector_service.create_elector(elector_dto)
         mensaje = 'Elector creado correctamente'
 
-        return render_template('register.html', mensaje=mensaje)
+        return render_template(REGISTER_TEMPLATE, mensaje=mensaje)
     except Exception as e:
         mensaje_error = f"Error al crear el elector: {str(e)}"
         logger.error(mensaje_error)
-        return render_template('register.html', mensaje=mensaje_error)
+        return render_template(REGISTER_TEMPLATE, mensaje=mensaje_error)
 
 @home_bp.route('/electores/<int:id>', methods=['GET'])
 def get_elector(id):
