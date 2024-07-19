@@ -41,8 +41,7 @@ def crear_elector():
             usuario=data.get('usuario'),
             contrasena=data.get('contrasena')
         )
-        
-        elector_creado = elector_service.create_elector(elector_dto)
+        elector_service.create_elector(elector_dto)
         mensaje = 'Elector creado correctamente'
 
         return render_template('register.html', mensaje=mensaje)
