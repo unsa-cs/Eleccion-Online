@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Listas de Candidatos{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mt-4">Listas de Candidatos</h1>
+    <div class="row">
+        {% for candidato in candidatos %}
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">{{ candidato.nombre }}</h5>
+                    <p class="card-text">Partido: {{ candidato.partido }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
