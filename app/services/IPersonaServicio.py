@@ -1,8 +1,4 @@
-# app/services/persona_service.py
-
 from abc import ABC, abstractmethod
-from app.dtos.elector_dto import ElectorDTO
-from domain.persona.modelo.Elector import Elector
 
 class ElectorService(ABC):
     @abstractmethod
@@ -10,7 +6,7 @@ class ElectorService(ABC):
         pass
 
     @abstractmethod
-    def create_elector(self, elector_dto: ElectorDTO):
+    def create_elector(self, elector_dto):
         pass
 
     @abstractmethod
