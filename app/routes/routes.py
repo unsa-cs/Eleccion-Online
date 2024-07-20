@@ -1,6 +1,7 @@
 from flask import render_template, Blueprint, request, jsonify
 from app.services.PersonaServicioImpl import ElectorServiceImpl
 from app.models.Elector import Elector
+from app import db
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -8,7 +9,12 @@ logger = logging.getLogger(__name__)
 
 home_bp = Blueprint('home_bp', __name__, template_folder='templates')
 
+
 elector_service = ElectorServiceImpl()
+
+@home_bp.route('/probando', methods=['POST'])
+def probando():
+    return "received"
 
 @home_bp.route('/')
 def index():

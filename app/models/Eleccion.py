@@ -1,21 +1,17 @@
-#!/usr/bin/python
-#-*- coding: utf-8 -*-
+from app import db
+from sqlalchemy import Enum
 
-class Eleccion:
-    def __init__(self):
-        self.id_eleccion = None
-        self.fecha = None
-        self.hora_inicio = None
-        self.hora_fin = None
-        self.estado = None
-        self.descripcion = None
+class Eleccion(db.Model):
+    id_eleccion = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    fecha = db.Column(db.Date, nullable=True)
+    hora_inicio = db.Column(db.Time, nullable=True)
+    hora_fin = db.Column(db.Time, nullable=True)
+    estado = db.Column(Enum('abierto', 'cerrado', name='estado_enum'), nullable=True)
+    descripcion = db.Column(db.String(100), nullable=True)
 
-    def iniciar_votacion(self, ):
-        pass
-
-    def cerrar_votacion(self, ):
-        pass
-
-    def contar_votos(self, ):
-        pass
-
+    def __init__(self, fecha, hora_inicio, hora_fin, estado, descripcion):
+        self.fecha = fecha
+        self.hora_inicio = hora_inicio
+        self.hora_fin = hora_fin
+        self.estado = estado
+        self.descripcion = descripcion
