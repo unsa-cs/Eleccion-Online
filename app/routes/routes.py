@@ -1,6 +1,11 @@
 from flask import render_template, Blueprint, request, jsonify
 from app.services.PersonaServicioImpl import ElectorServiceImpl
 from app.models.Elector import Elector
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 home_bp = Blueprint('home_bp', __name__, template_folder='templates')
 
 elector_service = ElectorServiceImpl()
@@ -36,6 +41,7 @@ def crear_elector():
         return render_template('register.html', mensaje=mensaje)
     except Exception as e:
         mensaje_error = f"Error al crear el elector: {str(e)}"
+        logger.error(mensaje_error)
         return render_template('register.html', mensaje=mensaje_error)
 
 @home_bp.route('/electores/<int:id>', methods=['GET'])
