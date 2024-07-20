@@ -1,5 +1,3 @@
-# app/dominio/persona/Elector.py
-
 from app import db
 
 class Elector(db.Model):

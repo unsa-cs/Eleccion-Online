@@ -12,9 +12,8 @@ def create_app():
     logging.basicConfig(level=logging.INFO)
     
     db.init_app(app)
-    migrate = Migrate(app, db)
 
-    from app.blueprints.home.routes import home_bp
+    from app.routes.routes import home_bp
     app.register_blueprint(home_bp)
 
     return app
