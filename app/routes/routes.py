@@ -1,5 +1,6 @@
 from flask import render_template, Blueprint, request, jsonify
 
+
 from app.services.PersonaServicioImpl import ElectorServiceImpl
 from app.services.EleccionServicioImpl import EleccionServicioImpl
 
@@ -19,7 +20,8 @@ eleccion_servicio = EleccionServicioImpl()
 
 @home_bp.route('/ListasCandidatos', methods=['GET'])
 def listar_candidatos():
-    return eleccion_servicio.get_all_eleccion()
+    elecciones = eleccion_servicio.get_all_eleccion()
+    return elecciones
 
 @home_bp.route('/')
 def index():

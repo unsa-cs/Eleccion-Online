@@ -5,6 +5,7 @@ from app.models.ListaCandidato import ListaCandidato
 
 app = create_app()
 migrate = Migrate(app, db) 
+
 with app.app_context():
     db.create_all()
 
