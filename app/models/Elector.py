@@ -8,6 +8,7 @@ class Elector(db.Model):
     fecha_nacimiento = db.Column(db.Date, nullable=False)
     usuario = db.Column(db.String(50), unique=True, nullable=False)
     contrasena = db.Column(db.String(100), nullable=False)
+    voto = db.relationship('Voto', backref=("voto"))
 
     def __init__(self, nombres, apellido_paterno, apellido_materno, fecha_nacimiento, usuario, contrasena):
         self.nombres = nombres

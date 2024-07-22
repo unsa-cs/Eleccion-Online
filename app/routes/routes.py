@@ -20,8 +20,9 @@ eleccion_servicio = EleccionServicioImpl()
 
 @home_bp.route('/ListasCandidatos', methods=['GET'])
 def listar_candidatos():
-    elecciones = eleccion_servicio.get_all_eleccion()
-    return elecciones
+    elecciones_json = eleccion_servicio.get_all_eleccion()
+    return render_template('ListaCandidato/lista_candidatos.html', elecciones=elecciones_json)
+ 
 
 @home_bp.route('/')
 def index():
