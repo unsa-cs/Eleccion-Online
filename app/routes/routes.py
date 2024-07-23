@@ -1,4 +1,4 @@
-from flask import render_template, Blueprint, request, jsonify
+from flask import render_template, Blueprint, request, redirect, url_for
 
 
 from app.services.PersonaServicioImpl import ElectorServiceImpl
@@ -26,11 +26,32 @@ def listar_elecciones():
     elecciones_json = eleccion_servicio.get_all_eleccion()
     return render_template('ProcesoVotacion/lista_eleccion.html', elecciones = elecciones_json)
 
-@home_bp.route('/VerCandidatos', methods=['POST'])
+@home_bp.route('/VerCandidatos', methods=['POST'])  
 def ver_candidatos():
     id_eleccion = request.form['eleccion_id']
     result = eleccion_servicio.get_candidatos_by_eleccion(id_eleccion)
     return render_template("ProcesoVotacion/prueba.html", data = result)
+
+@home_bp.route('/FormularioEleccion', methods=['GET'])  
+def agregar_eleccion():
+    return render_template("ProcesoVotacion/form_eleccion.html")
+
+@home_bp.route('/InsertEleccion', methods=['POST'])  
+def insert_eleccion():
+    fecha = request.form['fecha']
+    hora_inicio = request.form['hora_inicio']
+    hora_fin = request.form['hora_fin']
+    estado = request.form['estado']
+    descripcion = request.form['descripcion']
+    eleccion = Eleccion(fecha, hora_inicio, hora_fin, estado, descripcion)
+    eleccion_servicio.insert_eleccion(eleccion)
+    return url_for('home_bp.listar_elecciones')
+
+@home_bp.route('/Votacion', methods=['GET'])
+def ver_votacion():
+    return render_template('ProcesoVotacion/vota2.html')
+
+
 
 @home_bp.route('/')
 def index():

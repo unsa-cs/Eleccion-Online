@@ -29,4 +29,7 @@ class EleccionServicioImpl(IEleccionServicio):
         result = [{"Candidato": '%s %s %s' % (tupla[0], tupla[1], tupla[2]), "Lista": tupla[3]} for tupla in all_candidatos]
         return result
 
+    def insert_eleccion(self, eleccion):
+        db.session.add(eleccion)
+        db.session.commit()
 
