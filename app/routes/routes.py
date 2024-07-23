@@ -1,10 +1,14 @@
 from flask import render_template, Blueprint, request, jsonify
 
+
 from app.services.PersonaServicioImpl import ElectorServiceImpl
 from app.services.EleccionServicioImpl import EleccionServicioImpl
 
 from app.models.Elector import Elector
 from app.models.Eleccion import Eleccion
+from app.models.ListaCandidato import ListaCandidato
+from app.models.Candidato import Candidato
+
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -19,7 +23,17 @@ eleccion_servicio = EleccionServicioImpl()
 
 @home_bp.route('/ListasCandidatos', methods=['GET'])
 def listar_candidatos():
-    return eleccion_servicio.get_all_eleccion()
+    elecciones_json = eleccion_servicio.get_all_eleccion()
+    return render_template('ListaCandidato/lista_candidatos.html', elecciones=elecciones_json)
+
+@home_bp.route('/VerCandidatos', methods=['GET'])
+def ver_candidatos():
+    result = eleccion_servicio.get_candidatos_by_eleccion()
+    for nombres, nombre_lista in result:
+        print(f"Candidato: {nombres}, Lista: {nombre_lista}")
+    return 'received'
+
+    
 
 @home_bp.route('/')
 def index():

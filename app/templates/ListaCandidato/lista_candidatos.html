@@ -1,21 +1,31 @@
-{% extends 'base.html' %}
+{% extends "/ListaCandidato/base.html" %}
 
 {% block title %}Listas de Candidatos{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1 class="mt-4">Listas de Candidatos</h1>
-    <div class="row">
-        {% for candidato in candidatos %}
-        <div class="col-md-4">
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">{{ candidato.nombre }}</h5>
-                    <p class="card-text">Partido: {{ candidato.partido }}</p>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-</div>
+    <h1>Listas de Candidatos</h1>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Hora Inicio</th>
+                <th>Hora Fin</th>
+                <th>Estado</th>
+                <th>Descripción</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for eleccion in elecciones %}
+            <tr>
+                <td>{{ eleccion.id_eleccion }}</td>
+                <td>{{ eleccion.fecha }}</td>
+                <td>{{ eleccion.hora_inicio }}</td>
+                <td>{{ eleccion.hora_fin }}</td>
+                <td>{{ eleccion.estado }}</td>
+                <td>{{ eleccion.descripcion }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}
