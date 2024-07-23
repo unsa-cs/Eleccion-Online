@@ -1,6 +1,9 @@
 from app import db
+from app import ma
 
 class Elector(db.Model):
+    __tablename__ = 'elector'
+
     id = db.Column(db.Integer, primary_key=True)
     nombres = db.Column(db.String(100), nullable=False)
     apellido_paterno = db.Column(db.String(100), nullable=False)
@@ -8,7 +11,7 @@ class Elector(db.Model):
     fecha_nacimiento = db.Column(db.Date, nullable=False)
     usuario = db.Column(db.String(50), unique=True, nullable=False)
     contrasena = db.Column(db.String(100), nullable=False)
-    voto = db.relationship('Voto', backref=("voto"))
+    voto = db.relationship('voto', backref=("voto"))
 
     def __init__(self, nombres, apellido_paterno, apellido_materno, fecha_nacimiento, usuario, contrasena):
         self.nombres = nombres
@@ -18,6 +21,14 @@ class Elector(db.Model):
         self.usuario = usuario
         self.contrasena = contrasena
 
-    def emitir_voto(self, candidato_id):
-        # Lógica para emitir el voto
-        pass
+class ElectorSchema(ma.Schema):
+    class Meta:
+        fields = (
+            'id',
+            'nombres',
+            'apellido_paterno',
+            'apellido_materno',
+            'fecha_nacimiento',
+            'usuario',
+            'voto',
+        )
