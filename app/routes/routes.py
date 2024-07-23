@@ -21,19 +21,16 @@ elector_service = ElectorServiceImpl()
 eleccion_servicio = EleccionServicioImpl()
 
 
-@home_bp.route('/ListasCandidatos', methods=['GET'])
-def listar_candidatos():
+@home_bp.route('/EleccionesActivas', methods=['GET'])
+def listar_elecciones():
     elecciones_json = eleccion_servicio.get_all_eleccion()
-    return render_template('ListaCandidato/lista_candidatos.html', elecciones=elecciones_json)
+    return render_template('ProcesoVotacion/lista_eleccion.html', elecciones = elecciones_json)
 
-@home_bp.route('/VerCandidatos', methods=['GET'])
+@home_bp.route('/VerCandidatos', methods=['POST'])
 def ver_candidatos():
-    result = eleccion_servicio.get_candidatos_by_eleccion()
-    for nombres, nombre_lista in result:
-        print(f"Candidato: {nombres}, Lista: {nombre_lista}")
-    return 'received'
-
-    
+    id_eleccion = request.form['eleccion_id']
+    result = eleccion_servicio.get_candidatos_by_eleccion(id_eleccion)
+    return render_template("ProcesoVotacion/prueba.html", data = result)
 
 @home_bp.route('/')
 def index():

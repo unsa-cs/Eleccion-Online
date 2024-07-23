@@ -1,6 +1,8 @@
 #!/usr/bin/python
 #-*- coding: utf-8 -*-
 from app import db
+from flask import jsonify
+
 from app.models.Eleccion import Eleccion
 from app.models.Eleccion import EleccionSchema
 from app.models.Candidato import Candidato
@@ -21,8 +23,10 @@ class EleccionServicioImpl(IEleccionServicio):
         all_eleccion = Eleccion.query.all()
         result = eleccion_schemas.dump(all_eleccion)
         return result
-    def get_candidatos_by_eleccion(self):
-        all_candidatos = db.session.query(Candidato.nombres, ListaCandidato.nombre).join(ListaCandidato, ListaCandidato.id_lista == Candidato.id_lista_candidato).all()
-        return all_candidatos
+    
+    def get_candidatos_by_eleccion(self, id_eleccion):
+        all_candidatos = db.session.query(Candidato.nombres, Candidato.apellido_paterno, Candidato.apellido_materno, ListaCandidato.nombre).join(ListaCandidato, ListaCandidato.id_lista == Candidato.id_lista_candidato).filter(ListaCandidato.id_eleccion == id_eleccion).all()
+        result = [{"Candidato": '%s %s %s' % (tupla[0], tupla[1], tupla[2]), "Lista": tupla[3]} for tupla in all_candidatos]
+        return result
 
 
