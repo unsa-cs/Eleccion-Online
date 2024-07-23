@@ -6,3 +6,6 @@ class IEleccionServicio(ABC):
     @abstractmethod
     def get_all_eleccion(self):
         pass
+    @abstractmethod
+    def get_candidatos_by_eleccion(self, int):
+        pass

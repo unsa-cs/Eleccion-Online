@@ -1,3 +1,5 @@
 Flask
 Flask-SQLAlchemy
 Flask-migrations
+marshmallow marshmallow-sqlalchemy
+flask_marshmallow
