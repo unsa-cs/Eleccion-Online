@@ -1,3 +1,11 @@
 __pycache__/
 .env
+<<<<<<< HEAD
 .vscode/
+=======
+venv/
+.gitignore
+app/config.py
+sql_eleccion.sql
+migrations/
+>>>>>>> fadf6022efb99bec3a80903f9cbf3982772a3806

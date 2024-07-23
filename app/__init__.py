@@ -1,14 +1,16 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-import logging
+from flask_marshmallow import Marshmallow 
 
+import logging
+from app.config import Config
 db = SQLAlchemy()
+ma = Marshmallow()
 
 def create_app():
     app = Flask(__name__, static_folder='static', static_url_path='/static')
-    app.config.from_object('app.config.Config')
-
+    app.config.from_object(Config)
+    ma.init_app(app)
     logging.basicConfig(level=logging.INFO)
     
     db.init_app(app)
