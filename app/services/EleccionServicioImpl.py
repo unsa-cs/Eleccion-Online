@@ -28,6 +28,12 @@ class EleccionServicioImpl(IEleccionServicio):
         all_candidatos = db.session.query(Candidato.nombres, Candidato.apellido_paterno, Candidato.apellido_materno, ListaCandidato.nombre).join(ListaCandidato, ListaCandidato.id_lista == Candidato.id_lista_candidato).filter(ListaCandidato.id_eleccion == id_eleccion).all()
         result = [{"Candidato": '%s %s %s' % (tupla[0], tupla[1], tupla[2]), "Lista": tupla[3]} for tupla in all_candidatos]
         return result
+    
+    def get_all_eleccion_abiertas(self):
+        all_eleccion = Eleccion.query.filter(Eleccion.estado == "abierto").all()
+        result = eleccion_schemas.dump(all_eleccion)
+        return result
+    
 
     def insert_eleccion(self, eleccion):
         db.session.add(eleccion)

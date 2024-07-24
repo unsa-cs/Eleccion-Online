@@ -24,13 +24,13 @@ eleccion_servicio = EleccionServicioImpl()
 @home_bp.route('/EleccionesActivas', methods=['GET'])
 def listar_elecciones():
     elecciones_json = eleccion_servicio.get_all_eleccion()
-    return render_template('ProcesoVotacion/lista_eleccion.html', elecciones = elecciones_json)
+    return render_template('lista_eleccion.html', elecciones = elecciones_json)
 
 @home_bp.route('/VerCandidatos', methods=['POST'])  
 def ver_candidatos():
     id_eleccion = request.form['eleccion_id']
     result = eleccion_servicio.get_candidatos_by_eleccion(id_eleccion)
-    return render_template("ProcesoVotacion/prueba.html", data = result)
+    return render_template("lista_candidatos.html", data = result)
 
 @home_bp.route('/FormularioEleccion', methods=['GET'])  
 def agregar_eleccion():
@@ -47,8 +47,15 @@ def insert_eleccion():
     eleccion_servicio.insert_eleccion(eleccion)
     return url_for('home_bp.listar_elecciones')
 
-@home_bp.route('/Votacion', methods=['GET'])
+@home_bp.route('/EleccionVotacion', methods=['GET'])
+def seleccionar_eleccion_votacion():
+    elecciones_abiertas_json = eleccion_servicio.get_all_eleccion_abiertas()
+    return render_template('ProcesoVotacion/lista_eleccion_votacion.html', data = elecciones_abiertas_json)
+
+@home_bp.route('/Votacion', methods=['POST'])
 def ver_votacion():
+    id_eleccion = request.form['voto']
+    candidatos = eleccion_servicio.get_candidatos_by_eleccion(id_eleccion)
     return render_template('ProcesoVotacion/vota2.html')
 
 
