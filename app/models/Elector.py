@@ -8,7 +8,7 @@ class Elector(db.Model):
     apellido_materno = db.Column(db.String(100), nullable=False)
     fecha_nacimiento = db.Column(db.Date, nullable=False)
     usuario = db.Column(db.String(50), unique=True, nullable=False)
-    contrasena = db.Column(db.String(100), nullable=False)
+    contrasena = db.Column(db.String(80), nullable=False)
     correo = db.Column(db.String(100), nullable=False)
 
     def __init__(self, nombres, apellido_paterno, apellido_materno, fecha_nacimiento, usuario, contrasena, correo):
@@ -17,7 +17,7 @@ class Elector(db.Model):
         self.apellido_materno = apellido_materno
         self.fecha_nacimiento = fecha_nacimiento
         self.usuario = usuario
-        self.contrasena = self.hash_constrasena(contrasena)
+        self.contrasena = bcrypt.hashpw(contrasena.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         self.correo = correo
 
     def hash_constrasena(self, contrasena):
