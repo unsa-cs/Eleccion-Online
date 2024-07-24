@@ -20,7 +20,8 @@ class ElectorServiceImpl(ElectorService):
             apellido_materno=elector_modelo.apellido_materno,
             fecha_nacimiento=elector_modelo.fecha_nacimiento,
             usuario=elector_modelo.usuario,
-            contrasena=elector_modelo.contrasena
+            contrasena=elector_modelo.contrasena,
+            correo=elector_modelo.correo
         )
         try:
             db.session.add(elector)
