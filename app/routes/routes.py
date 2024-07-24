@@ -33,7 +33,7 @@ def login():
 def register():
     return render_template('register.html')
 
-@home_bp.route('/electores', methods=['POST'])
+@home_bp.route('/electores', methods=['GET','POST'])
 def crear_elector():
     try:
         data = request.form
@@ -43,10 +43,11 @@ def crear_elector():
             apellido_materno=data.get('apellido_materno'),
             fecha_nacimiento=data.get('fecha_nacimiento'),
             usuario=data.get('usuario'),
-            contrasena=data.get('contrasena')
+            contrasena=data.get('contrasena'),
+            correo=data.get('correo')
         )
-        
-        elector_creado = elector_service.create_elector(elector)
+
+        elector_service.create_elector(elector)
         mensaje = 'Elector creado correctamente'
 
         return render_template('register.html', mensaje=mensaje)
