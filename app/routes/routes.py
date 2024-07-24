@@ -1,4 +1,4 @@
-from flask import render_template, Blueprint, request, jsonify, session, redirect, url_for
+from flask import render_template, Blueprint, request, jsonify, session, redirect, url_for, make_response
 
 from app.services.PersonaServicioImpl import ElectorServiceImpl
 from app.services.EleccionServicioImpl import EleccionServicioImpl
@@ -79,9 +79,10 @@ def login():
 def dashboard():
     if 'correo' in session:
         elector = Elector.query.filter_by(correo=session['correo']).first()
-        if elector:
-            logger.info(f'El elector {elector.nombres} ha accedido al dashboard')
-            return render_template('dashboard.html', elector=elector)
+        response = make_response(render_template('dashboard.html', elector=elector))
+        response.headers['Cache-Control'] = 'no-store'
+        response.headers['Pragma'] = 'no-cache'
+        return response
     logger.warning('El usuario no ha iniciado sesión')
     return redirect(url_for('home_bp.login'))
 
