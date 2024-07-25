@@ -95,21 +95,9 @@
                 'nombre': lista.nombre,
                 'estado': lista.estado.value,
                 'id_eleccion': lista.id_eleccion,
-                'propuestas': [],
-                'candidatos': []
+                'propuestas': [{'descripcion': propuesta.descripcion} for propuesta in lista.propuestas],
+                'candidatos': [{'nombre': f"{candidato.nombres} {candidato.apellido_paterno} {candidato.apellido_materno}"} for candidato in lista.candidatos]
             }
-            
-            for propuesta in lista.propuestas:
-                lista_info['propuestas'].append({
-                    'id_propuesta': propuesta.id_propuesta,
-                    'descripcion': propuesta.descripcion
-                })
-            
-            for candidato in lista.candidatos:
-                lista_info['candidatos'].append({
-                    'id_candidato': candidato.id_candidato,
-                    'nombre': candidato.nombre
-                })
             
             resultado.append(lista_info)
         
