@@ -28,9 +28,9 @@
 </div>
 {% endblock %}
 {% block custom_scripts %}
+{% if mensaje %}
 <script>
-    {% if mensaje %}
     alert("{{ mensaje | escape }}");
-    {% endif %}
 </script>
+{% endif %}
 {% endblock %}
