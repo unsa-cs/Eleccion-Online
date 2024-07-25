@@ -8,14 +8,13 @@ from app.models.Elector import Elector
 from app.models.Eleccion import Eleccion
 from app.models.ListaCandidato import ListaCandidato
 from app.models.Candidato import Candidato
-
+    
 import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 home_bp = Blueprint('home_bp', __name__, template_folder='templates')
-
 
 elector_service = ElectorServiceImpl()
 eleccion_servicio = EleccionServicioImpl()
@@ -52,13 +51,11 @@ def seleccionar_eleccion_votacion():
     elecciones_abiertas_json = eleccion_servicio.get_all_eleccion_abiertas()
     return render_template('ProcesoVotacion/lista_eleccion_votacion.html', data = elecciones_abiertas_json)
 
-@home_bp.route('/Votacion', methods=['POST'])
-def ver_votacion():
+@home_bp.route('/CandidatosVotacion', methods=['POST'])
+def ver_candidatos_votacion():
     id_eleccion = request.form['voto']
     candidatos = eleccion_servicio.get_candidatos_by_eleccion(id_eleccion)
-    return render_template('ProcesoVotacion/vota2.html')
-
-
+    return render_template('ProcesoVotacion/vota2.html', data = candidatos)
 
 @home_bp.route('/')
 def index():

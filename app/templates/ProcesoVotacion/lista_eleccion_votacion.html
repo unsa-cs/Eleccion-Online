@@ -53,27 +53,28 @@
 <body>
     <h3>Eliga la eleccion en la que participara:</h3>
     <div class="container">
-        {% for eleccion in data %}
-        <div class="candidate">
-            <div id="nombre-eleccion">
-                <h5>{{ eleccion.descripcion }} </h5>
+        <form action="{{ url_for('home_bp.ver_candidatos_votacion') }}" method="post">
+            {% for eleccion in data %}
+            <div class="candidate">
+                <div id="nombre-eleccion">
+                    <h5>{{ eleccion.descripcion }} </h5>
+                </div>
+                <div id="nombre-partido">
+                    <h5>Fechas:</h5>
+                    <p>Inicio: {{ eleccion.hora_inicio }} </p>       
+                    <p>Fin:  {{ eleccion.hora_fin }} </p>
+                </div>
+                <div class="option">
+                    <input type="radio" name="voto" id="{{ eleccion.id_eleccion }}" value="{{ eleccion.id_eleccion }}">
+                </div>
             </div>
-            <div id="nombre-partido">
-                <h5>Fechas:</h5>
-                <p>Inicio: {{ eleccion.hora_inicio }} </p>       
-                <p>Fin:  {{ eleccion.hora_fin }} </p>
-            </div>
-            <div class="option">
-                <input type="radio" name="voto" id="{{ eleccion.id_eleccion }}">
-            </div>
-        </div>
-        {% endfor %}
-        <button class="btn btn-primary emitir-voto">Continuar a la votacion</button>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary emitir-voto">Continuar con la votación</button>
+        </form>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
 </body>
 {% endblock %}
