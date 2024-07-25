@@ -75,8 +75,46 @@
       def delete_elector(self, elector):
           pass
    ```
-2. Open/Closed Principle:**ElectorServiceImpl** extiende **ElectorService** y puede ser extendida para añadir nuevas funcionalidades sin modificar su código existente.
-3. Liskov Substitution Principle:**ElectorServiceImpl** puede ser sustituida por cualquier otra implementación de **ElectorService** sin afectar el correcto funcionamiento del sistema.
+2. Open/Closed Principle:La **IListaServicio** está abierta para extensión (se puede crear nuevas implementaciones), pero cerrada para modificación. No se necesita modificar la interfaz para agregar nuevas funcionalidades.
+    ```
+    class IListaServicio(ABC):
+    @abstractmethod
+    def obtener_listas_pendientes(self):
+        pass
+    ```
+3. Liskov Substitution Principle: **ListaServicioImpl** puede ser sustituida por cualquier otra implementación de **IListaServicio** sin alterar el comportamiento correcto del programa. Esto es asumido si todas las implementaciones de la interfaz siguen el contrato definido por **IListaServicio**.
+   ```
+    class ListaServicioImpl(IListaServicio):
+    def obtener_listas_pendientes(self):
+        listas = ListaCandidato.query.all()
+        resultado = []
+        
+        for lista in listas:
+            lista_info = {
+                'id_lista': lista.id_lista,
+                'nombre': lista.nombre,
+                'estado': lista.estado.value,
+                'id_eleccion': lista.id_eleccion,
+                'propuestas': [],
+                'candidatos': []
+            }
+            
+            for propuesta in lista.propuestas:
+                lista_info['propuestas'].append({
+                    'id_propuesta': propuesta.id_propuesta,
+                    'descripcion': propuesta.descripcion
+                })
+            
+            for candidato in lista.candidatos:
+                lista_info['candidatos'].append({
+                    'id_candidato': candidato.id_candidato,
+                    'nombre': candidato.nombre
+                })
+            
+            resultado.append(lista_info)
+        
+        return resultado
+   ```
 4. Interface Segregation Principle: **ElectorServiceImpl** implementa todos los métodos definidos en **ElectorService.** Aunque la implementación actual utiliza todos los métodos, la interfaz podría estar segmentada para cumplir completamente con ISP
 5. Dependency Inversion Principle:**ElectorServiceImpl** depende de la abstracción **ElectorService**
    ```
