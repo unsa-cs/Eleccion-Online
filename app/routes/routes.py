@@ -1,4 +1,4 @@
-from flask import render_template, Blueprint, request, redirect, url_for
+from flask import render_template, Blueprint, request, jsonify, session, redirect, url_for, make_response
 
 
 from app.services.PersonaServicioImpl import ElectorServiceImpl
@@ -8,7 +8,7 @@ from app.models.Elector import Elector
 from app.models.Eleccion import Eleccion
 from app.models.ListaCandidato import ListaCandidato
 from app.models.Candidato import Candidato
-    
+
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -25,17 +25,17 @@ def listar_elecciones():
     elecciones_json = eleccion_servicio.get_all_eleccion()
     return render_template('lista_eleccion.html', elecciones = elecciones_json)
 
-@home_bp.route('/VerCandidatos', methods=['POST'])  
+@home_bp.route('/VerCandidatos', methods=['POST'])
 def ver_candidatos():
     id_eleccion = request.form['eleccion_id']
     result = eleccion_servicio.get_candidatos_by_eleccion(id_eleccion)
     return render_template("lista_candidatos.html", data = result)
 
-@home_bp.route('/FormularioEleccion', methods=['GET'])  
+@home_bp.route('/FormularioEleccion', methods=['GET'])
 def agregar_eleccion():
     return render_template("ProcesoVotacion/form_eleccion.html")
 
-@home_bp.route('/InsertEleccion', methods=['POST'])  
+@home_bp.route('/InsertEleccion', methods=['POST'])
 def insert_eleccion():
     fecha = request.form['fecha']
     hora_inicio = request.form['hora_inicio']
@@ -61,35 +61,74 @@ def ver_candidatos_votacion():
 def index():
     return render_template('index.html')
 
-@home_bp.route('/login')
-def login():
-    return render_template('login.html')
 
-@home_bp.route('/register')
+@home_bp.route('/register', methods=['GET','POST'])
 def register():
-    return render_template('register.html')
-
-@home_bp.route('/electores', methods=['POST'])
-def crear_elector():
+    REGISTER_HTML = 'register.html'
     try:
-        data = request.form
-        elector = Elector(
-            nombres=data.get('nombres'),
-            apellido_paterno=data.get('apellido_paterno'),
-            apellido_materno=data.get('apellido_materno'),
-            fecha_nacimiento=data.get('fecha_nacimiento'),
-            usuario=data.get('usuario'),
-            contrasena=data.get('contrasena')
-        )
-        
-        elector_creado = elector_service.create_elector(elector)
-        mensaje = 'Elector creado correctamente'
+        if request.method == 'POST':
+            data = request.form
+            elector = Elector(
+                nombres=data.get('nombres'),
+                apellido_paterno=data.get('apellido_paterno'),
+                apellido_materno=data.get('apellido_materno'),
+                fecha_nacimiento=data.get('fecha_nacimiento'),
+                usuario=data.get('usuario'),
+                contrasena=data.get('contrasena'),
+                correo=data.get('correo')
+            )
 
-        return render_template('register.html', mensaje=mensaje)
+            elector_service.create_elector(elector,data.get('contrasena'))
+            mensaje = 'Elector creado correctamente'
+            return render_template(REGISTER_HTML, mensaje=mensaje)
+
+        return render_template(REGISTER_HTML)
     except Exception as e:
         mensaje_error = f"Error al crear el elector: {str(e)}"
         logger.error(mensaje_error)
-        return render_template('register.html', mensaje=mensaje_error)
+        return render_template(REGISTER_HTML, mensaje=mensaje_error)
+
+@home_bp.route('/login', methods=['GET','POST'])
+def login():
+    LOGIN_HTML = 'login.html'
+    try:
+        if request.method == 'POST':
+            data = request.form
+            correo = data.get('correo')
+            contrasena = data.get('contrasena')
+
+            elector = Elector.query.filter_by(correo=correo).first()
+            if elector and elector.revisar_contrasena(contrasena):
+                session['correo'] = elector.correo
+                logger.info(f'El elector {elector.nombres} ha iniciado sesión')
+                return render_template('dashboard.html', elector=elector)
+            else:
+                mensaje = 'Correo o contraseña incorrectos'
+                return render_template(LOGIN_HTML, mensaje=mensaje)
+        return render_template(LOGIN_HTML)
+    except Exception as e:
+        mensaje_error = f"Error al iniciar sesión: {str(e)}"
+        logger.error(mensaje_error)
+        return render_template(LOGIN_HTML, mensaje=mensaje_error)
+
+@home_bp.route('/dashboard')
+def dashboard():
+    if 'correo' in session:
+        elector = Elector.query.filter_by(correo=session['correo']).first()
+        response = make_response(render_template('dashboard.html', elector=elector))
+        response.headers['Cache-Control'] = 'no-store'
+        response.headers['Pragma'] = 'no-cache'
+        return response
+    logger.warning('El usuario no ha iniciado sesión')
+    return redirect(url_for('home_bp.login'))
+
+@home_bp.route('/logout')
+def logout():
+    if 'correo' in session:
+        logger.info(f'El elector {session["correo"]} ha cerrado sesión')
+        session.pop('correo', None)
+        session.clear()
+    return redirect(url_for('home_bp.login'))
 
 @home_bp.route('/electores/<int:id>', methods=['GET'])
 def get_elector(id):
