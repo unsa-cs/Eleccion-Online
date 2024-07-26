@@ -9,3 +9,10 @@ class IEleccionServicio(ABC):
     @abstractmethod
     def get_candidatos_by_eleccion(self, int):
         pass
+    @abstractmethod
+    def get_all_eleccion_abiertas(self):
+        pass
+    @abstractmethod
+    def insert_eleccion(self, eleccion):
+        pass
+    

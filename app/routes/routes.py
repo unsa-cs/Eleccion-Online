@@ -1,4 +1,4 @@
-from flask import render_template, Blueprint, request, jsonify
+from flask import render_template, Blueprint, request, redirect, url_for
 
 
 from app.services.PersonaServicioImpl import ElectorServiceImpl
@@ -8,7 +8,7 @@ from app.models.Elector import Elector
 from app.models.Eleccion import Eleccion
 from app.models.ListaCandidato import ListaCandidato
 from app.models.Candidato import Candidato
-
+    
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -16,24 +16,46 @@ logger = logging.getLogger(__name__)
 
 home_bp = Blueprint('home_bp', __name__, template_folder='templates')
 
-
 elector_service = ElectorServiceImpl()
 eleccion_servicio = EleccionServicioImpl()
 
 
-@home_bp.route('/ListasCandidatos', methods=['GET'])
-def listar_candidatos():
+@home_bp.route('/EleccionesActivas', methods=['GET'])
+def listar_elecciones():
     elecciones_json = eleccion_servicio.get_all_eleccion()
-    return render_template('ListaCandidato/lista_candidatos.html', elecciones=elecciones_json)
+    return render_template('lista_eleccion.html', elecciones = elecciones_json)
 
-@home_bp.route('/VerCandidatos', methods=['GET'])
+@home_bp.route('/VerCandidatos', methods=['POST'])  
 def ver_candidatos():
-    result = eleccion_servicio.get_candidatos_by_eleccion()
-    for nombres, nombre_lista in result:
-        print(f"Candidato: {nombres}, Lista: {nombre_lista}")
-    return 'received'
+    id_eleccion = request.form['eleccion_id']
+    result = eleccion_servicio.get_candidatos_by_eleccion(id_eleccion)
+    return render_template("lista_candidatos.html", data = result)
 
-    
+@home_bp.route('/FormularioEleccion', methods=['GET'])  
+def agregar_eleccion():
+    return render_template("ProcesoVotacion/form_eleccion.html")
+
+@home_bp.route('/InsertEleccion', methods=['POST'])  
+def insert_eleccion():
+    fecha = request.form['fecha']
+    hora_inicio = request.form['hora_inicio']
+    hora_fin = request.form['hora_fin']
+    estado = request.form['estado']
+    descripcion = request.form['descripcion']
+    eleccion = Eleccion(fecha, hora_inicio, hora_fin, estado, descripcion)
+    eleccion_servicio.insert_eleccion(eleccion)
+    return url_for('home_bp.listar_elecciones')
+
+@home_bp.route('/EleccionVotacion', methods=['GET'])
+def seleccionar_eleccion_votacion():
+    elecciones_abiertas_json = eleccion_servicio.get_all_eleccion_abiertas()
+    return render_template('ProcesoVotacion/lista_eleccion_votacion.html', data = elecciones_abiertas_json)
+
+@home_bp.route('/CandidatosVotacion', methods=['POST'])
+def ver_candidatos_votacion():
+    id_eleccion = request.form['voto']
+    candidatos = eleccion_servicio.get_candidatos_by_eleccion(id_eleccion)
+    return render_template('ProcesoVotacion/vota2.html', data = candidatos)
 
 @home_bp.route('/')
 def index():
