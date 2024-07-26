@@ -10,6 +10,8 @@
     <title>{% block title %}Página de Inicio{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    {% block head %}{% endblock %}
+
 </head>
 
 <body>
@@ -32,7 +34,7 @@
                     <a class="nav-link" href="{{ url_for('home_bp.login') }}">Inicio Sesión</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('home_bp.listar_candidatos') }}">Listas Candidatos</a>
+                    <a class="nav-link" href="{{ url_for('home_bp.listar_elecciones') }}">Listas Candidatos</a>
                 </li>
             </ul>
         </div>
