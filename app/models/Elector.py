@@ -2,6 +2,8 @@ from app import db
 import bcrypt
 
 class Elector(db.Model):
+    __tablename__ = 'elector'
+
     id = db.Column(db.Integer, primary_key=True)
     nombres = db.Column(db.String(100), nullable=False)
     apellido_paterno = db.Column(db.String(100), nullable=False)
