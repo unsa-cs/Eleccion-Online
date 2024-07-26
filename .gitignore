@@ -5,3 +5,4 @@ venv/
 app/config.py
 sql_eleccion.sql
 migrations/
+*.sql
