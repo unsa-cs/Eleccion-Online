@@ -1,5 +1,5 @@
 from flask import render_template, Blueprint, request, jsonify, session, redirect, url_for, make_response
-
+from flask_login import login_user, logout_user, login_required, login_manager
 
 from app.services.PersonaServicioImpl import ElectorServiceImpl
 from app.services.EleccionServicioImpl import EleccionServicioImpl
@@ -9,6 +9,7 @@ from app.models.Eleccion import Eleccion
 from app.models.ListaCandidato import ListaCandidato
 from app.models.Candidato import Candidato
 
+from functools import wraps
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -19,6 +20,13 @@ home_bp = Blueprint('home_bp', __name__, template_folder='templates')
 elector_service = ElectorServiceImpl()
 eleccion_servicio = EleccionServicioImpl()
 
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'correo' not in session:
+            return redirect(url_for('home_bp.login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 @home_bp.route('/EleccionesActivas', methods=['GET'])
 def listar_elecciones():
@@ -47,11 +55,13 @@ def insert_eleccion():
     return url_for('home_bp.listar_elecciones')
 
 @home_bp.route('/EleccionVotacion', methods=['GET'])
+@login_required
 def seleccionar_eleccion_votacion():
     elecciones_abiertas_json = eleccion_servicio.get_all_eleccion_abiertas()
     return render_template('ProcesoVotacion/lista_eleccion_votacion.html', data = elecciones_abiertas_json)
 
 @home_bp.route('/CandidatosVotacion', methods=['POST'])
+@login_required
 def ver_candidatos_votacion():
     id_eleccion = request.form['voto']
     candidatos = eleccion_servicio.get_candidatos_by_eleccion(id_eleccion)
@@ -112,6 +122,7 @@ def login():
         return render_template(LOGIN_HTML, mensaje=mensaje_error)
 
 @home_bp.route('/dashboard')
+@login_required
 def dashboard():
     if 'correo' in session:
         elector = Elector.query.filter_by(correo=session['correo']).first()
