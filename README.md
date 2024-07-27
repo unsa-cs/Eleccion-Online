@@ -44,15 +44,8 @@
 
 ### Open/Closed Principle (OCP) - Principio de Abierto/Cerrado
 
-- **Modelos y Servicios**: El código está diseñado para ser extendido sin modificar el código existente. Por ejemplo, puedes agregar nuevos métodos al servicio o nuevas relaciones a los modelos sin cambiar el código base. Las clases están abiertas a la extensión (agregar nuevas funcionalidades) pero cerradas a la modificación (no necesitas cambiar el código existente para agregar nuevas funcionalidades).
+- **Modelos y Servicios**: El código está diseñado para ser extendido sin modificar el código existente. Por ejemplo, se puede agregar nuevos métodos al servicio o nuevas relaciones a los modelos sin cambiar el código base. Las clases están abiertas a la extensión (agregar nuevas funcionalidades) pero cerradas a la modificación (no se necesita cambiar el código existente para agregar nuevas funcionalidades).
 
-### Liskov Substitution Principle (LSP) - Principio de Sustitución de Liskov
-
-- **Servicios**: Aunque en el código proporcionado no se usa explícitamente la herencia, el principio se sigue implícitamente al definir `EleccionServicioImpl` como una implementación de `IEleccionServicio`. Si existieran diferentes implementaciones de `IEleccionServicio`, deberían poder sustituirse entre sí sin afectar el funcionamiento del sistema.
-
-### Interface Segregation Principle (ISP) - Principio de Segregación de Interfaces
-
-- **Servicios**: La interfaz `IEleccionServicio` (si se define en tu código) y su implementación `EleccionServicioImpl` pueden seguir el principio de segregación de interfaces al asegurarse de que los clientes de la interfaz no dependan de métodos que no usan. En el código proporcionado, los métodos de `EleccionServicioImpl` están bien definidos y cada uno realiza una tarea específica.
 
 ### Dependency Inversion Principle (DIP) - Principio de Inversión de Dependencias
 
