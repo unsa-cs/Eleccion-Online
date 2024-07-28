@@ -6,7 +6,7 @@ class ElectorService(ABC):
         pass
 
     @abstractmethod
-    def create_elector(self, elector_dto):
+    def create_elector(self, elector):
         pass
 
     @abstractmethod

@@ -15,6 +15,8 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+REGISTER_TEMPLATE = 'register.html'
+
 home_bp = Blueprint('home_bp', __name__, template_folder='templates')
 
 elector_service = ElectorServiceImpl()
@@ -152,3 +154,18 @@ def actualizar_elector(id):
 @home_bp.route('/electores/<int:id>', methods=['DELETE'])
 def eliminar_elector(id):
     return
+
+@home_bp.route('/candidatos')
+def mostrar_candidatos():
+    servicio = EleccionServicioImpl()  
+    candidatos_con_propuestas = servicio.get_candidatos_con_propuestas()
+    precandidatos_denegados = servicio.get_precandidatos_denegados()
+    precandidatos_inscritos = servicio.get_precandidatos_inscritos()
+
+    return render_template(
+        'a/candidatos.html', 
+        candidatos=candidatos_con_propuestas,
+        precandidatos_denegados=precandidatos_denegados,
+        precandidatos_inscritos=precandidatos_inscritos
+    )
+

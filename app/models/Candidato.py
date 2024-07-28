@@ -15,6 +15,8 @@ class Candidato(db.Model):
         self.apellido_materno = apellido_materno
         self.id_lista_candidato = id_lista_canditado
 
+    propuestas = db.relationship('Propuesta', backref='candidato', lazy=True)
+    
 class CandidatoSchema(ma.Schema):
     class Meta:
         fields = (
