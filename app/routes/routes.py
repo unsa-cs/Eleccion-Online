@@ -24,10 +24,19 @@ elector_service = ElectorServiceImpl()
 eleccion_servicio = EleccionServicioImpl()
 lista_servicio = ListaServicioImpl()
 
+@home_bp.route('/Admin')
+def home():
+    return render_template('Admin/home.html')
+
 @home_bp.route('/ListasCandidatos', methods=['GET'])
 def listar_candidatos():
     listas_json = lista_servicio.obtener_listas_pendientes()
     return render_template('ListaCandidato/lista_candidatos.html', listas=listas_json)
+
+@home_bp.route('/emitir_voto', methods=['GET'])
+def listar_elecciones():
+    eleccion_json = eleccion_servicio.get_all_eleccion()
+    return render_template('ListaCandidato/lista_candidatos.html', listas=eleccion_json)
 
 @home_bp.route('/VerCandidatos', methods=['GET'])
 def ver_candidatos():
