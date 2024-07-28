@@ -9,3 +9,4 @@ class Propuesta(db.Model):
     def __init__(self, descripcion, id_lista):
         self.descripcion = descripcion
         self.id_lista = id_lista
+

@@ -9,7 +9,7 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Registro</h5>
-                    <form method="POST" action="{{ url_for('home_bp.crear_elector') }}">
+                    <form method="POST" action="{{ url_for('home_bp.register') }}">
                         <!-- Nombres -->
                         <div class="form-group">
                             <label for="inputNombres">Nombres</label>
@@ -18,22 +18,30 @@
                         <!-- Apellido Paterno -->
                         <div class="form-group">
                             <label for="inputApellidoPaterno">Apellido Paterno</label>
-                            <input type="text" class="form-control" id="inputApellidoPaterno" name="apellido_paterno" required>
+                            <input type="text" class="form-control" id="inputApellidoPaterno" name="apellido_paterno"
+                                required>
                         </div>
                         <!-- Apellido Materno -->
                         <div class="form-group">
                             <label for="inputApellidoMaterno">Apellido Materno</label>
-                            <input type="text" class="form-control" id="inputApellidoMaterno" name="apellido_materno" required>
+                            <input type="text" class="form-control" id="inputApellidoMaterno" name="apellido_materno"
+                                required>
                         </div>
                         <!-- Fecha de Nacimiento -->
                         <div class="form-group">
                             <label for="inputFechaNacimiento">Fecha de Nacimiento</label>
-                            <input type="date" class="form-control" id="inputFechaNacimiento" name="fecha_nacimiento" required>
+                            <input type="date" class="form-control" id="inputFechaNacimiento" name="fecha_nacimiento"
+                                required>
                         </div>
                         <!-- Usuario -->
                         <div class="form-group">
                             <label for="inputUsuario">Usuario</label>
                             <input type="text" class="form-control" id="inputUsuario" name="usuario" required>
+                        </div>
+                        <!-- Correo -->
+                        <div class="form-group">
+                            <label for="inputCorreo">Correo</label>
+                            <input type="email" class="form-control" id="inputCorreo" name="correo" required>
                         </div>
                         <!-- Contraseña -->
                         <div class="form-group">

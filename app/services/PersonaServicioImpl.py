@@ -13,14 +13,15 @@ class ElectorServiceImpl(ElectorService):
             logger.error(f'Error al obtener el elector por ID: {str(e)}')
             raise e
 
-    def create_elector(self, elector_modelo):
+    def create_elector(self, elector_modelo, contrasena:str):
         elector = Elector(
             nombres=elector_modelo.nombres,
             apellido_paterno=elector_modelo.apellido_paterno,
             apellido_materno=elector_modelo.apellido_materno,
             fecha_nacimiento=elector_modelo.fecha_nacimiento,
             usuario=elector_modelo.usuario,
-            contrasena=elector_modelo.contrasena
+            contrasena=contrasena,
+            correo=elector_modelo.correo
         )
         try:
             db.session.add(elector)
@@ -29,7 +30,7 @@ class ElectorServiceImpl(ElectorService):
             return elector
         except Exception as e:
             db.session.rollback()
-            logger.error(f'Error al crear el elector: {str(e)}')
+            logger.error(f'Error al crear el electbor: {str(e)}')
             raise e
 
     def update_elector(self, elector: Elector):
