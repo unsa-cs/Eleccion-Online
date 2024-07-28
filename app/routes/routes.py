@@ -1,4 +1,4 @@
-from flask import render_template, Blueprint, request, jsonify, session, redirect, url_for, make_response
+from flask import render_template, Blueprint, request, jsonify, session, redirect, url_for, make_response, flash
 from flask_login import login_user, logout_user, login_required, login_manager
 
 from app.services.PersonaServicioImpl import ElectorServiceImpl
@@ -57,6 +57,10 @@ def insert_eleccion():
 @home_bp.route('/EleccionVotacion', methods=['GET'])
 @login_required
 def seleccionar_eleccion_votacion():
+    elector = eleccion_servicio.get_elector_by_email(session['correo'])
+    voto = eleccion_servicio.get_voto_by_elector(elector.id)
+    if voto:
+        return redirect(url_for('home_bp.dashboard'))
     elecciones_abiertas_json = eleccion_servicio.get_all_eleccion_abiertas()
     return render_template('ProcesoVotacion/lista_eleccion_votacion.html', data = elecciones_abiertas_json)
 
@@ -64,8 +68,16 @@ def seleccionar_eleccion_votacion():
 @login_required
 def ver_candidatos_votacion():
     id_eleccion = request.form['voto']
-    candidatos = eleccion_servicio.get_candidatos_by_eleccion(id_eleccion)
-    return render_template('ProcesoVotacion/vota2.html', data = candidatos)
+    candidatos = eleccion_servicio.get_lista_by_eleccion(id_eleccion)
+    return render_template('ProcesoVotacion/votacion.html', data = candidatos)
+
+@home_bp.route('/Votar', methods=['POST'])
+@login_required
+def votar():
+    id_lista = request.form['id_lista']
+    elector = eleccion_servicio.get_elector_by_email(session['correo'])
+    eleccion_servicio.votar(id_lista, elector.id)
+    return redirect(url_for('home_bp.dashboard'))
 
 @home_bp.route('/')
 def index():
@@ -108,10 +120,11 @@ def login():
             contrasena = data.get('contrasena')
 
             elector = Elector.query.filter_by(correo=correo).first()
+            voto = eleccion_servicio.get_voto_by_elector(elector.id)
             if elector and elector.revisar_contrasena(contrasena):
                 session['correo'] = elector.correo
                 logger.info(f'El elector {elector.nombres} ha iniciado sesión')
-                return render_template('dashboard.html', elector=elector)
+                return render_template('dashboard.html', elector=elector, voto=voto)
             else:
                 mensaje = 'Correo o contraseña incorrectos'
                 return render_template(LOGIN_HTML, mensaje=mensaje)
@@ -124,9 +137,11 @@ def login():
 @home_bp.route('/dashboard')
 @login_required
 def dashboard():
+
     if 'correo' in session:
-        elector = Elector.query.filter_by(correo=session['correo']).first()
-        response = make_response(render_template('dashboard.html', elector=elector))
+        elector = eleccion_servicio.get_elector_by_email(session['correo'])
+        voto = eleccion_servicio.get_voto_by_elector(elector.id)
+        response = make_response(render_template('dashboard.html', elector=elector, voto=voto))
         response.headers['Cache-Control'] = 'no-store'
         response.headers['Pragma'] = 'no-cache'
         return response
