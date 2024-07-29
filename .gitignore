@@ -1,0 +1,7 @@
+__pycache__/
+.env
+venv/
+.gitignore
+migrations/
+*.sql
+README.md
