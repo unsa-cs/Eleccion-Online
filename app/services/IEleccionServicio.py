@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#-*- coding: utf-8 -*-
 from abc import ABC, abstractmethod
 
 class IEleccionServicio(ABC):
@@ -29,4 +27,17 @@ class IEleccionServicio(ABC):
         pass
     @abstractmethod
     def get_voto_by_elector(self, id_elector):
+        pass
+
+class ICandidatoServicio(ABC):
+    @abstractmethod
+    def get_candidatos_denegados(self):
+        pass
+    @abstractmethod
+    def get_candidatos_inscritos(self):
+        pass
+
+class IListaServicio(ABC):
+    @abstractmethod
+    def obtener_listas_pendientes(self):
         pass

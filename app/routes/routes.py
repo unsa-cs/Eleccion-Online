@@ -3,6 +3,8 @@ from flask_login import login_user, logout_user, login_required, login_manager
 
 from app.services.PersonaServicioImpl import ElectorServiceImpl
 from app.services.EleccionServicioImpl import EleccionServicioImpl
+from app.services.EleccionServicioImpl import ListaServicioImpl
+from app.services.EleccionServicioImpl import CandidatoServicioImpl
 
 from app.models.Elector import Elector
 from app.models.Eleccion import Eleccion
@@ -16,17 +18,29 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 REGISTER_TEMPLATE = 'register.html'
+LOGIN_ROUTE = 'home_bp.login'
 
 home_bp = Blueprint('home_bp', __name__, template_folder='templates')
 
 elector_service = ElectorServiceImpl()
 eleccion_servicio = EleccionServicioImpl()
+lista_servicio = ListaServicioImpl()
+candidato_servicio = CandidatoServicioImpl()
+
+@home_bp.route('/Admin')
+def home():
+    return render_template('Admin/home.html')
+
+@home_bp.route('/ListasCandidatos', methods=['GET'])
+def listar_candidatos():
+    listas_json = lista_servicio.obtener_listas_pendientes()
+    return render_template('ListaCandidato/lista_candidatos.html', listas=listas_json)
 
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'correo' not in session:
-            return redirect(url_for('home_bp.login'))
+            return redirect(url_for(LOGIN_ROUTE))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -148,7 +162,7 @@ def dashboard():
         response.headers['Pragma'] = 'no-cache'
         return response
     logger.warning('El usuario no ha iniciado sesión')
-    return redirect(url_for('home_bp.login'))
+    return redirect(url_for(LOGIN_ROUTE))
 
 @home_bp.route('/logout')
 def logout():
@@ -156,7 +170,7 @@ def logout():
         logger.info(f'El elector {session["correo"]} ha cerrado sesión')
         session.pop('correo', None)
         session.clear()
-    return redirect(url_for('home_bp.login'))
+    return redirect(url_for(LOGIN_ROUTE))
 
 @home_bp.route('/electores/<int:id>', methods=['GET'])
 def get_elector(id):
@@ -172,15 +186,10 @@ def eliminar_elector(id):
 
 @home_bp.route('/candidatos')
 def mostrar_candidatos():
-    servicio = EleccionServicioImpl()  
-    candidatos_con_propuestas = servicio.get_candidatos_con_propuestas()
-    precandidatos_denegados = servicio.get_precandidatos_denegados()
-    precandidatos_inscritos = servicio.get_precandidatos_inscritos()
+    candidatos_inscritos = candidato_servicio.get_candidatos_inscritos()
 
     return render_template(
         'a/candidatos.html', 
-        candidatos=candidatos_con_propuestas,
-        precandidatos_denegados=precandidatos_denegados,
-        precandidatos_inscritos=precandidatos_inscritos
+        candidatos_inscritos=candidatos_inscritos
     )
 
