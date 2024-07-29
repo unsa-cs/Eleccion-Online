@@ -1,4 +1,5 @@
 from app import db
+from app import ma
 
 class Propuesta(db.Model):
     __tablename__ = 'propuesta'
@@ -9,4 +10,12 @@ class Propuesta(db.Model):
     def __init__(self, descripcion, id_lista):
         self.descripcion = descripcion
         self.id_lista = id_lista
+
+class PropuestaSchema(ma.Schema):
+    class Meta:
+        fields = (
+            'id_propuesta',
+            'descripcion',
+            'id_lista_candidato'
+        )
 

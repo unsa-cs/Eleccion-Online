@@ -6,22 +6,15 @@ from app.models.Eleccion import EleccionSchema
 from app.models.Candidato import Candidato
 from app.models.Candidato import CandidatoSchema
 from app.models.ListaCandidato import ListaCandidato
-from app.models.Propuesta import Propuesta
 from app.models.Propuesta import PropuestaSchema
-from app.models.Prepropuesta import Prepropuesta
-from app.models.Prepropuesta import PrepropuestaSchema
-from app.models.Precandidato import Precandidato
-from app.models.Precandidato import PrecandidatoSchema
-
 from app.services.IEleccionServicio import IEleccionServicio
 from app.services.IEleccionServicio import IListaServicio
+from app.services.IEleccionServicio import ICandidatoServicio
 
 candidato_schema = CandidatoSchema()
 eleccion_schema = EleccionSchema()
 eleccion_schemas = EleccionSchema(many = True)
 propuesta_schema = PropuestaSchema()
-precandidato_schema = PrecandidatoSchema()
-prepropuesta_schema = PrepropuestaSchema()
 
 class EleccionServicioImpl(IEleccionServicio):
     def get_all_eleccion(self):
@@ -42,48 +35,30 @@ class EleccionServicioImpl(IEleccionServicio):
         db.session.add(eleccion)
         db.session.commit()
 
-    def get_candidatos_con_propuestas(self):
-       
-        candidatos = Candidato.query.options(db.joinedload(Candidato.propuestas)).all()
-        
+
+class CandidatoServicioImpl(ICandidatoServicio):
+    def get_candidatos_denegados(self):
+        candidatos = Candidato.query \
+            .filter(Candidato.denegado == True) \
+            .all()
+
         result = []
         for candidato in candidatos:
             candidato_data = candidato_schema.dump(candidato)
-            propuestas_data = propuesta_schema.dump(candidato.propuestas, many=True)
-            candidato_data['propuestas'] = propuestas_data
             result.append(candidato_data)
-        
-        return result
-    
-    def get_precandidatos_denegados(self):
-        precandidatos = Precandidato.query \
-            .filter(Precandidato.denegado == -1) \
-            .options(db.joinedload(Precandidato.prepropuestas)) \
-            .all()
-        
-        result = []
-        for precandidato in precandidatos:
-            precandidato_data = precandidato_schema.dump(precandidato)
-            prepropuestas_data = prepropuesta_schema.dump(precandidato.prepropuestas, many=True)
-            precandidato_data['prepropuestas'] = prepropuestas_data
-            result.append(precandidato_data)
-        
+
         return result
 
-    
-    def get_precandidatos_inscritos(self):
-        precandidatos = Precandidato.query\
-            .filter(Precandidato.denegado == 0) \
-            .options(db.joinedload(Precandidato.prepropuestas))\
+    def get_candidatos_inscritos(self):
+        candidatos = Candidato.query \
+            .filter(Candidato.denegado == False) \
             .all()
 
         result = []
-        for precandidato in precandidatos:
-            precandidato_data = precandidato_schema.dump(precandidato)
-            prepropuestas_data = prepropuesta_schema.dump(precandidato.prepropuestas, many=True)
-            precandidato_data['prepropuestas'] = prepropuestas_data
-            result.append(precandidato_data)
-        
+        for candidato in candidatos:
+            candidato_data = candidato_schema.dump(candidato)
+            result.append(candidato_data)
+
         return result
 
 class ListaServicioImpl(IListaServicio):

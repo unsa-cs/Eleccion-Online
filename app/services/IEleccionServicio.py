@@ -14,6 +14,14 @@ class IEleccionServicio(ABC):
     def insert_eleccion(self, eleccion):
         pass
 
+class ICandidatoServicio(ABC):
+    @abstractmethod
+    def get_candidatos_denegados(self):
+        pass
+    @abstractmethod
+    def get_candidatos_inscritos(self):
+        pass
+
 class IListaServicio(ABC):
     @abstractmethod
     def obtener_listas_pendientes(self):
