@@ -6,7 +6,6 @@ from app.models.Eleccion import EleccionSchema
 from app.models.Candidato import Candidato
 from app.models.Candidato import CandidatoSchema
 from app.models.ListaCandidato import ListaCandidato
-from app.models.ListaCandidato import ListaCanditadoSchema
 from app.models.Elector import Elector
 from app.models.Voto import Voto
 from app.models.Propuesta import Propuesta
