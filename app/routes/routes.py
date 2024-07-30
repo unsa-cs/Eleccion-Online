@@ -1,3 +1,6 @@
+import logging
+from functools import wraps
+
 from flask import render_template, Blueprint, request, jsonify, session, redirect, url_for, make_response, flash
 from flask_login import login_user, logout_user, login_required, login_manager
 
@@ -13,8 +16,6 @@ from app.models.Candidato import Candidato
 from app.services.PersonaServicioImpl import ElectorServiceImpl
 from app.services.EleccionServicioImpl import EleccionServicioImpl
 
-from functools import wraps
-import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
