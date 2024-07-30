@@ -3,7 +3,7 @@ __pycache__/
 venv/
 .gitignore
 app/config.py
-sql_eleccion.sql
 migrations/
 *.sql
 sonar-project.properties
+.scannerwork/
