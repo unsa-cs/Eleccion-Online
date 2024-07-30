@@ -7,7 +7,7 @@ class Candidato(db.Model):
     nombres = db.Column(db.String(100), nullable=False)
     apellido_paterno = db.Column(db.String(100), nullable=False)
     apellido_materno = db.Column(db.String(100), nullable=False)
-    id_lista = db.Column(db.Integer, db.ForeignKey('listacandidato.id_lista'),nullable=True)
+    id_lista = db.Column(db.Integer, db.ForeignKey('lista_candidato.id_lista'),nullable=True)
     
     def __init__(self, nombres, apellido_paterno, apellido_materno, id_lista_canditado):
         self.nombres = nombres
