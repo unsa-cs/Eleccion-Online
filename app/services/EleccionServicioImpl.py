@@ -43,7 +43,6 @@ class EleccionServicioImpl(IEleccionServicio):
         result = eleccion_schemas.dump(all_eleccion)
         return result
     
-
     def insert_eleccion(self, eleccion):
         db.session.add(eleccion)
         db.session.commit()
