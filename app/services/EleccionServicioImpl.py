@@ -40,9 +40,9 @@ class EleccionServicioImpl(IEleccionServicio):
                 Candidato.apellido_paterno, 
                 Candidato.apellido_materno, 
                 ListaCandidato.nombre, 
-                Candidato.id
+                Candidato.id_candidato
             ).join(
-                ListaCandidato, ListaCandidato.id_lista == Candidato.id_lista_candidato
+                ListaCandidato, ListaCandidato.id_lista == Candidato.id_lista
             ).filter(
                 ListaCandidato.id_eleccion == id_eleccion
             ).all()

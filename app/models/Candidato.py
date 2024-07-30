@@ -22,5 +22,5 @@ class CandidatoSchema(ma.Schema):
             'nombres',
             'apellido_paterno',
             'apellido_materno',
-            'id_lista_candidato'
+            'id_lista'
         )
