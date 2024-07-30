@@ -1,5 +1,6 @@
 from app import db
 from app import ma
+
 class Propuesta(db.Model):
     __tablename__ = 'propuesta'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

@@ -1,15 +1,14 @@
+import logging
+
 from flask import render_template, Blueprint, request, jsonify, session, redirect, url_for, make_response
-
-
-from app.services.PersonaServicioImpl import ElectorServiceImpl
-from app.services.EleccionServicioImpl import EleccionServicioImpl
 
 from app.models.Elector import Elector
 from app.models.Eleccion import Eleccion
 from app.models.ListaCandidato import ListaCandidato
 from app.models.Candidato import Candidato
+from app.services.PersonaServicioImpl import ElectorServiceImpl
+from app.services.EleccionServicioImpl import EleccionServicioImpl
 
-import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
