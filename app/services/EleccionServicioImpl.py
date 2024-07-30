@@ -1,6 +1,6 @@
-from app import db
-from flask import jsonify
+import logging
 
+from app import db
 from app.models.Eleccion import Eleccion
 from app.models.Eleccion import EleccionSchema
 from app.models.Candidato import Candidato
@@ -8,19 +8,16 @@ from app.models.Candidato import CandidatoSchema
 from app.models.ListaCandidato import ListaCandidato
 from app.models.Elector import Elector
 from app.models.Voto import Voto
-from app.models.Propuesta import Propuesta
 from app.models.Propuesta import PropuestaSchema
 from app.services.IEleccionServicio import IEleccionServicio
 from app.services.IEleccionServicio import IListaServicio
 from app.services.IEleccionServicio import ICandidatoServicio
 
-import logging
 logger = logging.getLogger(__name__)
 
 eleccion_schema = EleccionSchema()
 eleccion_schemas = EleccionSchema(many = True)
 candidato_schema = CandidatoSchema()
-
 propuesta_schema = PropuestaSchema()
 
 class EleccionServicioImpl(IEleccionServicio):
@@ -113,6 +110,7 @@ class EleccionServicioImpl(IEleccionServicio):
             logger.error(f'Error al obtener el voto del elector: {str(e)}')
             raise e
         
+        
 class CandidatoServicioImpl(ICandidatoServicio):
     def get_candidatos_denegados(self):
         candidatos = Candidato.query \
@@ -136,6 +134,7 @@ class CandidatoServicioImpl(ICandidatoServicio):
             result.append(candidato_data)
 
         return result
+
 
 class ListaServicioImpl(IListaServicio):
     def obtener_listas_pendientes(self):

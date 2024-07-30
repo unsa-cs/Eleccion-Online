@@ -11,6 +11,7 @@ class Propuesta(db.Model):
         self.descripcion = descripcion
         self.id_lista = id_lista
 
+
 class PropuestaSchema(ma.Schema):
     class Meta:
         fields = (

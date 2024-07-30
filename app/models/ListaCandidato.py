@@ -1,13 +1,16 @@
-from app import db
+import enum
+
 from sqlalchemy import Enum
+
+from app import db
 from app.models.Propuesta import Propuesta
 from app.models.Candidato import Candidato
-import enum
 
 class EstadoListaEnum(enum.Enum):
     aprobado = "aprobado"
     desaprobado = "desaprobado"
     pendiente = "pendiente"
+
 
 class ListaCandidato(db.Model):
     __tablename__ = 'listacandidato'
