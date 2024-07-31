@@ -227,7 +227,6 @@ class ElectorServiceImpl(ElectorService):
 
 ## Pipeline
 
-**Aplicación en el código:**
 Las operaciones siguen una secuencia lógica de pasos. Por ejemplo, en `create_elector`, se verifican los datos del elector, se crea una nueva instancia y finalmente se intenta guardar en la base de datos. Similarmente, en los métodos de las rutas, se siguen pasos secuenciales desde la recepción de datos hasta la respuesta final al usuario.
 
 ```
@@ -261,7 +260,6 @@ def create_elector(self, elector_modelo, contrasena: str):
 
 ## Cookbook
 
-**Aplicación en el código:**
 Se siguen patrones comunes como CRUD (Create, Read, Update, Delete) para la gestión de electores. Los métodos `create_elector`, `get_elector_by_id`, `update_elector`, y `delete_elector` son ejemplos claros de este enfoque. Asimismo, las rutas para registro, login, dashboard y logout siguen patrones típicos de manejo de sesiones y autenticación.
 
 ```
@@ -293,7 +291,6 @@ class ElectorServiceImpl(ElectorService):
 
 ## RESTful
 
-**Aplicación en el código:**
 Las rutas definidas como `/register`, `/login`, `/dashboard`, y `/logout` están diseñadas para interactuar con los recursos `Elector`, siguiendo las convenciones de los métodos HTTP y los principios RESTful:
 
 ```
@@ -322,7 +319,6 @@ def logout():
 
 ## Programación Defensiva
 
-**Aplicación en el código:**
 Se anticipan y manejan posibles errores, como al verificar si un elector ya existe antes de crearlo o al manejar excepciones durante las operaciones de base de datos y la lógica de negocio. También se verifican las credenciales de login y se manejan las sesiones de usuario de manera segura.
 
 ```
@@ -335,7 +331,6 @@ def create_elector(self, elector_modelo, contrasena: str):
 
 ## Programación Declarativa (Uso de ORM)
 
-**Aplicación en el código:**
 Se utiliza SQLAlchemy como ORM para interactuar con la base de datos de manera declarativa. Por ejemplo, `Elector.query.filter_by(correo=correo).first()` declara el criterio de búsqueda sin especificar detalles de implementación.
 
 ```
@@ -347,7 +342,6 @@ existing_elector = Elector.query.filter_by(correo=correo).first()
 
 ## Programación Basada en Excepciones
 
-**Aplicación en el código:**
 El uso de bloques `try`, `except` y `raise` para manejar errores y situaciones excepcionales es evidente en varias partes del código, asegurando que los errores se manejen adecuadamente y se registre la información relevante mediante el uso de `logger`.
 
 ```
