@@ -154,7 +154,7 @@ class CandidatoServicioImpl(ICandidatoServicio):
         return result
 
 class ListaServicioImpl(IListaServicio):
-    def obtener_listas_pendientes(self):
+    def obtener_listas(self):
         listas = ListaCandidato.query.all()
         resultado = []
         
@@ -218,3 +218,20 @@ class ListaServicioImpl(IListaServicio):
         except Exception as e:
             logger.error(f'Error al obtener la lista por id: {str(e)}')
             raise e
+    
+    def obtener_listas_aprobadas(self):
+        listas_aprobadas = ListaCandidato.query.filter_by(estado='aprobado').all()
+    
+        resultado = []
+        
+        for lista in listas_aprobadas:
+            lista_info = {
+                'id_lista': lista.id_lista,
+                'nombre': lista.nombre,
+                'propuestas': [{'descripcion': propuesta.descripcion} for propuesta in lista.propuestas],
+                'candidatos': [{'nombre': f"{candidato.nombres} {candidato.apellido_paterno} {candidato.apellido_materno}"} for candidato in lista.candidatos]
+            }
+            
+            resultado.append(lista_info)
+        
+        return resultado
