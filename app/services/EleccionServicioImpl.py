@@ -10,7 +10,7 @@ from app.models.Eleccion import Eleccion
 from app.models.Eleccion import EleccionSchema
 from app.models.Candidato import Candidato
 from app.models.Candidato import CandidatoSchema
-from app.models.ListaCandidato import ListaCandidato, ListaCandidatoSchema
+from app.models.ListaCandidato import EstadoListaEnum, ListaCandidato, ListaCandidatoSchema
 from app.models.Elector import Elector
 from app.models.Voto import Voto
 from app.models.Propuesta import PropuestaSchema, Propuesta
@@ -115,7 +115,15 @@ class EleccionServicioImpl(IEleccionServicio):
         except Exception as e:
             logger.error(f'Error al obtener el elector por email: {str(e)}')
             raise e
-
+        
+    def get_elecciones_hechas_por_elector(self, id_elector):
+        try:
+            elecciones = db.session.query(ListaCandidato.id_eleccion).join(Voto, ListaCandidato.id_lista == Voto.id_lista).filter(Voto.id_elector == id_elector).all()
+            result = [tupla[0] for tupla in elecciones]
+            return result
+        except Exception as e:
+            logger.error(f'Error al obtener las elecciones hechas por el elector: {str(e)}')
+            raise e
 
         
 class VotoServicioImpl(IVotoServicio):
@@ -159,6 +167,13 @@ class VotoServicioImpl(IVotoServicio):
         return result
 
 class CandidatoServicioImpl(ICandidatoServicio):
+    def get_candidatos(self, estado):
+        candidatos = self.obtener_candidatos_filtrados(estado)
+        return self.transformar_candidatos(candidatos)
+
+    def obtener_candidatos_filtrados(self, estado):
+        return Candidato.query.filter(Candidato.denegado == estado).all()
+    
     def get_candidatos_denegados(self):
         candidatos = Candidato.query \
             .filter(Candidato.denegado == True) \
@@ -184,7 +199,7 @@ class CandidatoServicioImpl(ICandidatoServicio):
 
 
 class ListaServicioImpl(IListaServicio):
-    def obtener_listas_pendientes(self):
+    def obtener_listas(self):
         listas = ListaCandidato.query.all()
         resultado = []
         
@@ -259,3 +274,53 @@ class ListaServicioImpl(IListaServicio):
         except Exception as e:
             logger.error(f'Error al obtener las listas por elección: {str(e)}')
             raise e
+        
+    def aprobar_lista(self, id_lista):
+        try:
+            lista = ListaCandidato.query.filter_by(id_lista=id_lista).first()
+            if lista:
+                lista.estado = EstadoListaEnum.aprobado.value
+                db.session.commit()
+                return {"mensaje": "Lista aprobada exitosamente", "id_lista": lista.id_lista}
+            else:
+                return {"mensaje": "Lista no encontrada", "id_lista": id_lista}
+        except Exception as e:
+            logger.error(f'Error al aprobar la lista: {str(e)}')
+            raise e
+
+    def desaprobar_lista(self, id_lista):
+        try:
+            lista = ListaCandidato.query.filter_by(id_lista=id_lista).first()
+            if lista:
+                lista.estado = EstadoListaEnum.desaprobado.value
+                db.session.commit()
+                return {"mensaje": "Lista desaprobada exitosamente", "id_lista": lista.id_lista}
+            else:
+                return {"mensaje": "Lista no encontrada", "id_lista": id_lista}
+        except Exception as e:
+            logger.error(f'Error al desaprobar la lista: {str(e)}')
+
+    def get_lista_by_id(self, id_lista):
+        try:
+            listas = ListaCandidato.query.get(id_lista)
+            return listas
+        except Exception as e:
+            logger.error(f'Error al obtener la lista por id: {str(e)}')
+            raise e
+
+    def obtener_listas_aprobadas(self):
+        listas_aprobadas = ListaCandidato.query.filter_by(estado='aprobado').all()
+
+        resultado = []
+
+        for lista in listas_aprobadas:
+            lista_info = {
+                'id_lista': lista.id_lista,
+                'nombre': lista.nombre,
+                'propuestas': [{'descripcion': propuesta.descripcion} for propuesta in lista.propuestas],
+                'candidatos': [{'nombre': f"{candidato.nombres} {candidato.apellido_paterno} {candidato.apellido_materno}"} for candidato in lista.candidatos]
+            }
+
+            resultado.append(lista_info)
+
+        return resultado
