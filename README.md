@@ -223,74 +223,145 @@ class ElectorServiceImpl(ElectorService):
             raise e
 ```
 
-# # Estilos de Programación# Estilos de Programación en el Proyecto
+# Estilos de Programación
 
 ## Pipeline
 
 **Aplicación en el código:**
 Las operaciones siguen una secuencia lógica de pasos. Por ejemplo, en `create_elector`, se verifican los datos del elector, se crea una nueva instancia y finalmente se intenta guardar en la base de datos. Similarmente, en los métodos de las rutas, se siguen pasos secuenciales desde la recepción de datos hasta la respuesta final al usuario.
 
-## Cookbook
-
-**Aplicación en el código:**
-Se siguen patrones comunes como CRUD (Create, Read, Update, Delete) para la gestión de electores. Los métodos `create_elector`, `get_elector_by_id`, `update_elector`, y `delete_elector` son ejemplos claros de este enfoque. Asimismo, las rutas para registro, login, dashboard y logout siguen patrones típicos de manejo de sesiones y autenticación.
-
-## RESTful
-
-**Aplicación en el código:**
-Las rutas definidas como `/register`, `/login`, `/dashboard`, y `/logout` están diseñadas para interactuar con los recursos `Elector`, siguiendo las convenciones de los métodos HTTP y los principios RESTful:
-
--   `POST` para `register` (crear un nuevo recurso),
--   `POST` para `login` (autenticación),
--   `GET` para `dashboard` (recuperación de recursos),
--   `GET` para `logout` (finalización de sesión).
-
-## Programación Defensiva
-
-**Aplicación en el código:**
-Se anticipan y manejan posibles errores, como al verificar si un elector ya existe antes de crearlo o al manejar excepciones durante las operaciones de base de datos y la lógica de negocio. También se verifican las credenciales de login y se manejan las sesiones de usuario de manera segura.
-
-## Programación Declarativa (Uso de ORM)
-
-**Aplicación en el código:**
-Se utiliza SQLAlchemy como ORM para interactuar con la base de datos de manera declarativa. Por ejemplo, `Elector.query.filter_by(correo=correo).first()` declara el criterio de búsqueda sin especificar detalles de implementación.
-
-## Programación Basada en Excepciones
-
-**Aplicación en el código:**
-El uso de bloques `try`, `except` y `raise` para manejar errores y situaciones excepcionales es evidente en varias partes del código, asegurando que los errores se manejen adecuadamente y se registre la información relevante mediante el uso de `logger`.
-
-## Pipeline
-
-**Aplicación en el código:**
-Las operaciones siguen una secuencia lógica de pasos. Por ejemplo, en `create_elector`, se verifican los datos del elector, se crea una nueva instancia y finalmente se intenta guardar en la base de datos. Similarmente, en los métodos de las rutas, se siguen pasos secuenciales desde la recepción de datos hasta la respuesta final al usuario.
+```
+def create_elector(self, elector_modelo, contrasena: str):
+    existing_elector = Elector.query.filter_by(correo=elector_modelo.correo).first()
+    if existing_elector:
+        raise ValueError("Ya existe un elector con este correo.")
+    elector = Elector(
+        nombres=elector_modelo.nombres,
+        apellido_paterno=elector_modelo.apellido_paterno,
+        apellido_materno=elector_modelo.apellido_materno,
+        fecha_nacimiento=elector_modelo.fecha_nacimiento,
+        usuario=elector_modelo.usuario,
+        contrasena=contrasena,
+        correo=elector_modelo.correo
+    )
+    try:
+        db.session.add(elector)
+        db.session.commit()
+        logger.info(f'Elector creado correctamente: {elector}')
+        return elector
+    except IntegrityError as e:
+        db.session.rollback()
+        logger.error(f'Error al crear el elector: {str(e)}')
+        raise ValueError("Error al crear el elector: ya existe un elector con este correo.:")
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f'Error al crear el elector: {str(e)}')
+        raise e
+```
 
 ## Cookbook
 
 **Aplicación en el código:**
 Se siguen patrones comunes como CRUD (Create, Read, Update, Delete) para la gestión de electores. Los métodos `create_elector`, `get_elector_by_id`, `update_elector`, y `delete_elector` son ejemplos claros de este enfoque. Asimismo, las rutas para registro, login, dashboard y logout siguen patrones típicos de manejo de sesiones y autenticación.
 
+```
+class ElectorServiceImpl(ElectorService):
+    def get_elector_by_id(self, id):
+        return Elector.query.get(id)
+
+    def update_elector(self, elector: Elector):
+        try:
+            db.session.merge(elector)
+            db.session.commit()
+            logger.info(f'Elector actualizado correctamente: {elector}')
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f'Error al actualizar el elector: {str(e)}')
+            raise e
+
+    def delete_elector(self, elector: Elector):
+        try:
+            db.session.delete(elector)
+            db.session.commit()
+            logger.info(f'Elector eliminado correctamente: {elector}')
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f'Error al eliminar el elector: {str(e)}')
+            raise e
+
+```
+
 ## RESTful
 
 **Aplicación en el código:**
 Las rutas definidas como `/register`, `/login`, `/dashboard`, y `/logout` están diseñadas para interactuar con los recursos `Elector`, siguiendo las convenciones de los métodos HTTP y los principios RESTful:
 
--   `POST` para `register` (crear un nuevo recurso),
--   `POST` para `login` (autenticación),
--   `GET` para `dashboard` (recuperación de recursos),
--   `GET` para `logout` (finalización de sesión).
+```
+@home_bp.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        # Manejo de registro POST
+        # ...
+        return render_template('register.html', mensaje=mensaje)
+    return render_template('register.html')
+
+@home_bp.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        # Manejo de login POST
+        # ...
+        return render_template('dashboard.html', elector=elector)
+    return render_template('login.html')
+
+@home_bp.route('/logout')
+def logout():
+    # Manejo de logout
+    return redirect(url_for('home_bp.login'))
+
+```
 
 ## Programación Defensiva
 
 **Aplicación en el código:**
 Se anticipan y manejan posibles errores, como al verificar si un elector ya existe antes de crearlo o al manejar excepciones durante las operaciones de base de datos y la lógica de negocio. También se verifican las credenciales de login y se manejan las sesiones de usuario de manera segura.
 
+```
+def create_elector(self, elector_modelo, contrasena: str):
+    existing_elector = Elector.query.filter_by(correo=elector_modelo.correo).first()
+    if existing_elector:
+        raise ValueError("Ya existe un elector con este correo.")
+    # ...
+```
+
 ## Programación Declarativa (Uso de ORM)
 
 **Aplicación en el código:**
 Se utiliza SQLAlchemy como ORM para interactuar con la base de datos de manera declarativa. Por ejemplo, `Elector.query.filter_by(correo=correo).first()` declara el criterio de búsqueda sin especificar detalles de implementación.
 
+```
+def get_elector_by_id(self, id):
+    return Elector.query.get(id)
+
+existing_elector = Elector.query.filter_by(correo=correo).first()
+```
+
 ## Programación Basada en Excepciones
 
 **Aplicación en el código:**
 El uso de bloques `try`, `except` y `raise` para manejar errores y situaciones excepcionales es evidente en varias partes del código, asegurando que los errores se manejen adecuadamente y se registre la información relevante mediante el uso de `logger`.
+
+```
+try:
+    db.session.add(elector)
+    db.session.commit()
+    logger.info(f'Elector creado correctamente: {elector}')
+    return elector
+except IntegrityError as e:
+    db.session.rollback()
+    logger.error(f'Error al crear el elector: {str(e)}')
+    raise ValueError("Error al crear el elector: ya existe un elector con este correo.")
+except Exception as e:
+    db.session.rollback()
+    logger.error(f'Error al crear el elector: {str(e)}')
+    raise e
+```
