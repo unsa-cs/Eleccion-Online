@@ -79,10 +79,20 @@ class EleccionServicioImpl(IEleccionServicio):
         except Exception as e:
             logger.error(f'Error al obtener el elector por email: {str(e)}')
             raise e
-
+    def get_elecciones_hechas_por_elector(self, id_elector):
+        #select lc.id_eleccion from voto v inner join listacandidato lc on lc.id_lista = v.id_lista where v.id_elector = 1;
+        try:
+            elecciones = db.session.query(ListaCandidato.id_eleccion).join(Voto, ListaCandidato.id_lista == Voto.id_lista).filter(Voto.id_elector == id_elector).all()
+            result = [tupla[0] for tupla in elecciones]
+            print("luna de muekl")
+            return result
+        except Exception as e:
+            logger.error(f'Error al obtener las elecciones hechas por el elector: {str(e)}')
+            raise e
 
         
 class VotoServicioImpl(IVotoServicio):
+        
     def get_voto_by_elector(self, id_elector):
         try:
             voto = db.session.query(Elector.nombres).join(Voto, Elector.id == Voto.id_elector).filter(Elector.id == id_elector).all()
@@ -177,4 +187,12 @@ class ListaServicioImpl(IListaServicio):
             return result
         except Exception as e:
             logger.error(f'Error al obtener las listas por elección: {str(e)}')
+            raise e
+        
+    def get_lista_by_id(self, id_lista):
+        try:
+            listas = ListaCandidato.query.get(id_lista)
+            return listas
+        except Exception as e:
+            logger.error(f'Error al obtener la lista por id: {str(e)}')
             raise e
