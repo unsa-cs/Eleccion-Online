@@ -4,4 +4,3 @@ venv/
 .gitignore
 migrations/
 *.sql
-README.md
