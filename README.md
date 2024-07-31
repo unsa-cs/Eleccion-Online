@@ -5,29 +5,29 @@ El manejo de errores es esencial para que cualquier aplicación sea sólida y co
 ## Implementación:
 
 
-@home_bp.route('/inscripcion', methods=['GET', 'POST'])
-def listas():
-    if request.method == 'POST':
-        try:
-            for i in range(3):
-                nombre = request.form[f'nombre{i}']
-                estado = request.form[f'estado{i}']
-                id_eleccion = request.form[f'eleccion{i}']
+    @home_bp.route('/inscripcion', methods=['GET', 'POST'])
+    def listas():
+        if request.method == 'POST':
+            try:
+                for i in range(3):
+                    nombre = request.form[f'nombre{i}']
+                    estado = request.form[f'estado{i}']
+                    id_eleccion = request.form[f'eleccion{i}']
 
-                if not nombre or not estado or not id_eleccion:
-                    raise ValueError("Todos los campos deben ser llenados.")
+                    if not nombre or not estado or not id_eleccion:
+                        raise ValueError("Todos los campos deben ser llenados.")
 
-                nuevo_candidato = crear_candidato(nombre, estado, id_eleccion)
-                guardar_en_bd(nuevo_candidato)
-            return redirect(url_for('success_page'))
-        except ValueError as e:
-            flash(f"Error en los datos del formulario: {e}", "error")
-        except Exception as e:
-            db.session.rollback()
-            flash(f"Se produjo un error al guardar los datos: {e}", "error")
-        finally:
-            db.session.remove()
-    return render_template('inscripcion.html')
+                    nuevo_candidato = crear_candidato(nombre, estado, id_eleccion)
+                    guardar_en_bd(nuevo_candidato)
+                return redirect(url_for('success_page'))
+            except ValueError as e:
+                flash(f"Error en los datos del formulario: {e}", "error")
+            except Exception as e:
+                db.session.rollback()
+                flash(f"Se produjo un error al guardar los datos: {e}", "error")
+            finally:
+                db.session.remove()
+        return render_template('inscripcion.html')
 
 ## 2. Pipeline (Flujo de Datos)
 
@@ -35,13 +35,13 @@ def listas():
 
 ## Implementación:
 
-def crear_candidato(nombre, estado, id_eleccion):
-    nuevo_candidato = Candidato(nombre=nombre, estado=estado, id_eleccion=id_eleccion)
-    return nuevo_candidato
+    def crear_candidato(nombre, estado, id_eleccion):
+        nuevo_candidato = Candidato(nombre=nombre, estado=estado, id_eleccion=id_eleccion)
+        return nuevo_candidato
 
-def guardar_en_bd(candidato):
-    db.session.add(candidato)
-    db.session.commit()
+    def guardar_en_bd(candidato):
+        db.session.add(candidato)
+        db.session.commit()
 
 ## 3. Restful 
 
