@@ -1,4 +1,4 @@
-## 1. Error/Exception Handling (Manejo de Errores/Excepciones)
+## 1. Error/Exception Handling 
 
 El manejo de errores es esencial para que cualquier aplicación sea sólida y confiable. Cuando implementé el manejo de excepciones en mi código, me aseguré de que el sistema pudiera gestionar errores inesperados de forma controlada. Esto no solo previene que la aplicación se caiga, sino que también permite mostrar mensajes de error claros y amigables para el usuario. Así, si algo sale mal, el usuario recibe una notificación útil en lugar de un fallo inesperado.
 
@@ -29,19 +29,19 @@ El manejo de errores es esencial para que cualquier aplicación sea sólida y co
                 db.session.remove()
         return render_template('inscripcion.html')
 
-## 2. Pipeline (Flujo de Datos)
-
- El patrón Pipeline se basa en procesar los datos a través de varias etapas secuenciales. Cuando lo implementé, lo utilicé para validar y procesar la información paso a paso antes de almacenarla en la base de datos. Cada etapa del pipeline se encarga de una tarea específica, lo que permite un flujo de datos más ordenado y controlado, asegurando que cada pieza de información sea tratada correctamente antes de llegar a su destino final.
+## 2. Persistent-Tables
+El uso de SQLAlchemy para definir modelos como ListaCandidato, Propuesta, y Candidato refleja el concepto de "Persistent-Tables". Este patrón se refiere a la práctica de definir estructuras de datos persistentes (tablas) que se almacenan en una base de datos. Los objetos de Python mapeados a estas tablas (a través de clases de modelo) permiten la persistencia de datos entre las ejecuciones de la aplicación.
 
 ## Implementación:
 
-    def crear_candidato(nombre, estado, id_eleccion):
-        nuevo_candidato = Candidato(nombre=nombre, estado=estado, id_eleccion=id_eleccion)
-        return nuevo_candidato
+    class ListaCandidato(db.Model):
+        __tablename__ = 'listacandidato'
+        
+        id_lista = db.Column(db.Integer, primary_key=True, autoincrement=True)
+        nombre = db.Column(db.String(100), nullable=True)
+        estado = db.Column(Enum(EstadoListaEnum), nullable=True, default=EstadoListaEnum.pendiente)
+        id_eleccion = db.Column(db.Integer, db.ForeignKey('eleccion.id_eleccion'), nullable=True)
 
-    def guardar_en_bd(candidato):
-        db.session.add(candidato)
-        db.session.commit()
 
 ## 3. Restful 
 

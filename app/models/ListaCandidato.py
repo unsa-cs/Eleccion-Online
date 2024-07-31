@@ -11,6 +11,7 @@ class EstadoListaEnum(enum.Enum):
 
 class ListaCandidato(db.Model):
     __tablename__ = 'listacandidato'
+    
     id_lista = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nombre = db.Column(db.String(100), nullable=True)
     estado = db.Column(Enum(EstadoListaEnum), nullable=True, default=EstadoListaEnum.pendiente)
