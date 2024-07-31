@@ -32,7 +32,6 @@ class EleccionServicioImpl(IEleccionServicio):
         try:
             all_eleccion = Eleccion.query.all()
             result = eleccion_schemas.dump(all_eleccion)
-            print(result)
             return result
         except Exception as e:
             logger.error(f'Error al obtener todas las elecciones: {str(e)}')
@@ -80,11 +79,9 @@ class EleccionServicioImpl(IEleccionServicio):
             logger.error(f'Error al obtener el elector por email: {str(e)}')
             raise e
     def get_elecciones_hechas_por_elector(self, id_elector):
-        #select lc.id_eleccion from voto v inner join listacandidato lc on lc.id_lista = v.id_lista where v.id_elector = 1;
         try:
             elecciones = db.session.query(ListaCandidato.id_eleccion).join(Voto, ListaCandidato.id_lista == Voto.id_lista).filter(Voto.id_elector == id_elector).all()
             result = [tupla[0] for tupla in elecciones]
-            print("luna de muekl")
             return result
         except Exception as e:
             logger.error(f'Error al obtener las elecciones hechas por el elector: {str(e)}')
