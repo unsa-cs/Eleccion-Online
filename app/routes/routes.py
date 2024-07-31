@@ -1,7 +1,7 @@
 import logging
 from functools import wraps
 
-from flask import render_template, Blueprint, request, jsonify, session, redirect, url_for, make_response, flash
+from flask import render_template, Blueprint, request, jsonify, session, redirect, url_for, make_response, flash, abort
 from flask_login import login_user, logout_user, login_required, login_manager
 
 from app.services.PersonaServicioImpl import ElectorServiceImpl
@@ -21,7 +21,7 @@ from app.services.EleccionServicioImpl import EleccionServicioImpl
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-REGISTER_TEMPLATE = 'register.html'
+##REGISTER_TEMPLATE = 'register.html'
 LOGIN_ROUTE = 'home_bp.login'
 
 home_bp = Blueprint('home_bp', __name__, template_folder='templates')
@@ -35,6 +35,14 @@ voto_servicio = VotoServicioImpl()
 @home_bp.route('/Admin')
 def home():
     return render_template('Admin/home.html')
+
+
+@home_bp.route('/ListaElecciones', methods=['GET'])
+def mostrar_elecciones():
+    eleccionesf = eleccion_servicio.get_all_eleccion(1)
+    eleccionescurso = eleccion_servicio.get_all_eleccion(2)
+    eleccionespro = eleccion_servicio.get_all_eleccion(3)
+    return render_template('a/elecciones.html', eleccionespro=eleccionespro, eleccionesf=eleccionesf, eleccionescurso=eleccionescurso)
 
 
 @home_bp.route('/ListasCandidatos', methods=['GET'])
@@ -52,10 +60,18 @@ def login_required(f):
     return decorated_function
 
 
-@home_bp.route('/EleccionesActivas', methods=['GET'])
+@home_bp.route('/EleccionesActivas', methods=['GET'])       
 def listar_elecciones():
-    elecciones_json = eleccion_servicio.get_all_eleccion()
+    elecciones_json = eleccion_servicio.get_all_eleccion(4)
     return render_template('lista_eleccion.html', elecciones = elecciones_json)
+
+@home_bp.route('/candidatos/<int:id>', methods=['GET'])
+def ver_lista_candidatos(id):
+    listas_candidato = lista_servicio.get_lista_por_eleccion(id)
+    
+    if listas_candidato is None:
+        abort(404)  
+    return render_template('ListaCandidato/lista_candidatos.html', listas=listas_candidato)
 
 @home_bp.route('/VerListas', methods=['POST'])
 def ver_candidatos():
@@ -79,6 +95,7 @@ def insert_eleccion():
     eleccion = Eleccion(fecha, hora_inicio, hora_fin, estado, descripcion)
     eleccion_servicio.insert_eleccion(eleccion)
     return url_for('home_bp.listar_elecciones')
+
 
 @home_bp.route('/Votos')
 def ver_votos():
