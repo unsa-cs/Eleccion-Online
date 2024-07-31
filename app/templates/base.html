@@ -8,6 +8,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <title>{% block title %}Página de Inicio{% endblock %}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     {% block head %}{% endblock %}
@@ -34,7 +35,7 @@
                     <a class="nav-link" href="{{ url_for('home_bp.login') }}">Inicio Sesión</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('home_bp.listar_elecciones') }}">Listas Candidatos</a>
+                    <a class="nav-link" href="{{ url_for('home_bp.listas_candidatos_elector') }}">Listas Candidatos</a>
                 </li>
             </ul>
         </div>

@@ -8,6 +8,7 @@ from app.models.Eleccion import EleccionSchema
 from app.models.Candidato import Candidato
 from app.models.Candidato import CandidatoSchema
 from app.models.ListaCandidato import ListaCandidato
+from app.models.ListaCandidato import EstadoListaEnum
 from app.models.Elector import Elector
 from app.models.Voto import Voto
 from app.models.Propuesta import Propuesta
@@ -24,7 +25,6 @@ logger = logging.getLogger(__name__)
 eleccion_schema = EleccionSchema()
 eleccion_schemas = EleccionSchema(many = True)
 candidato_schema = CandidatoSchema()
-
 propuesta_schema = PropuestaSchema()
 
 class EleccionServicioImpl(IEleccionServicio):
@@ -43,9 +43,9 @@ class EleccionServicioImpl(IEleccionServicio):
                 Candidato.apellido_paterno, 
                 Candidato.apellido_materno, 
                 ListaCandidato.nombre, 
-                Candidato.id
+                Candidato.id_candidato
             ).join(
-                ListaCandidato, ListaCandidato.id_lista == Candidato.id_lista_candidato
+                ListaCandidato, ListaCandidato.id_lista == Candidato.id_lista
             ).filter(
                 ListaCandidato.id_eleccion == id_eleccion
             ).all()
@@ -130,31 +130,25 @@ class VotoServicioImpl(IVotoServicio):
         return result
 
 class CandidatoServicioImpl(ICandidatoServicio):
-    def get_candidatos_denegados(self):
-        candidatos = Candidato.query \
-            .filter(Candidato.denegado == True) \
-            .all()
-        result = []
-        for candidato in candidatos:
-            candidato_data = candidato_schema.dump(candidato)
-            result.append(candidato_data)
+    
+    def get_candidatos(self, estado):
+        candidatos = self.obtener_candidatos_filtrados(estado)
+        return self.transformar_candidatos(candidatos)
+    
+    def obtener_candidatos_filtrados(self, estado):
+        return Candidato.query.filter(Candidato.denegado == estado).all()
 
-        return result
+    def transformar_candidatos(self, candidatos):
+        return [candidato_schema.dump(candidato) for candidato in candidatos]
+
+    def get_candidatos_denegados(self):
+        return self.get_candidatos(True)
 
     def get_candidatos_inscritos(self):
-        candidatos = Candidato.query \
-            .filter(Candidato.denegado == False) \
-            .all()
-
-        result = []
-        for candidato in candidatos:
-            candidato_data = candidato_schema.dump(candidato)
-            result.append(candidato_data)
-
-        return result
+        return self.get_candidatos(False)
 
 class ListaServicioImpl(IListaServicio):
-    def obtener_listas_pendientes(self):
+    def obtener_listas(self):
         listas = ListaCandidato.query.all()
         resultado = []
         
@@ -185,6 +179,31 @@ class ListaServicioImpl(IListaServicio):
         except Exception as e:
             logger.error(f'Error al obtener las listas por elección: {str(e)}')
             raise e
+
+    def aprobar_lista(self, id_lista):
+        try:
+            lista = ListaCandidato.query.filter_by(id_lista=id_lista).first()
+            if lista:
+                lista.estado = EstadoListaEnum.aprobado.value
+                db.session.commit()
+                return {"mensaje": "Lista aprobada exitosamente", "id_lista": lista.id_lista}
+            else:
+                return {"mensaje": "Lista no encontrada", "id_lista": id_lista}
+        except Exception as e:
+            logger.error(f'Error al aprobar la lista: {str(e)}')
+            raise e
+
+    def desaprobar_lista(self, id_lista):
+        try:
+            lista = ListaCandidato.query.filter_by(id_lista=id_lista).first()
+            if lista:
+                lista.estado = EstadoListaEnum.desaprobado.value
+                db.session.commit()
+                return {"mensaje": "Lista desaprobada exitosamente", "id_lista": lista.id_lista}
+            else:
+                return {"mensaje": "Lista no encontrada", "id_lista": id_lista}
+        except Exception as e:
+            logger.error(f'Error al desaprobar la lista: {str(e)}')
         
     def get_lista_by_id(self, id_lista):
         try:
@@ -193,3 +212,20 @@ class ListaServicioImpl(IListaServicio):
         except Exception as e:
             logger.error(f'Error al obtener la lista por id: {str(e)}')
             raise e
+    
+    def obtener_listas_aprobadas(self):
+        listas_aprobadas = ListaCandidato.query.filter_by(estado='aprobado').all()
+    
+        resultado = []
+        
+        for lista in listas_aprobadas:
+            lista_info = {
+                'id_lista': lista.id_lista,
+                'nombre': lista.nombre,
+                'propuestas': [{'descripcion': propuesta.descripcion} for propuesta in lista.propuestas],
+                'candidatos': [{'nombre': f"{candidato.nombres} {candidato.apellido_paterno} {candidato.apellido_materno}"} for candidato in lista.candidatos]
+            }
+            
+            resultado.append(lista_info)
+        
+        return resultado
