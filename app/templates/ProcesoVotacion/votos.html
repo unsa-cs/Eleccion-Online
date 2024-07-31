@@ -7,14 +7,14 @@
         <thead>
             <tr>
                 <th>Nombre</th>
-                <th>Lista</th>
+                <th>Cantidad Votos</th>
             </tr>
         </thead>
         <tbody>
             {% for voto in data %}
             <tr>
-                <td>{{ voto.nombre_completo }}</td>
                 <td>{{ voto.nombre_lista }}</td>
+                <td>{{ voto.cant_votos }}</td>
             </tr>
             {% endfor %}
         </tbody>
