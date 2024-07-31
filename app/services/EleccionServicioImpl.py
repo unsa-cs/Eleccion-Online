@@ -36,7 +36,7 @@ class EleccionServicioImpl(IEleccionServicio):
 
                 all_eleccion = Eleccion.query.filter(
                     (Eleccion.fecha < ahora.date()) |
-                    ((Eleccion.fecha == ahora.date()) & (Eleccion.hora_fin < ahora.time))
+                    ((Eleccion.fecha == ahora.date()) & (Eleccion.hora_fin < ahora.time()))
                 ).all()
 
                 result = eleccion_schemas.dump(all_eleccion)
@@ -46,21 +46,22 @@ class EleccionServicioImpl(IEleccionServicio):
                 ahora = datetime.now()
 
                 all_eleccion = Eleccion.query.filter(
-                    ((Eleccion.fecha == ahora.date()) & (Eleccion.hora_inicio < ahora.time) & (Eleccion.hora_fin > ahora.time))
+                    ((Eleccion.fecha == ahora.date()) & (Eleccion.hora_inicio < ahora.time()) & (Eleccion.hora_fin > ahora.time()))
                 ).all()
 
                 result = eleccion_schemas.dump(all_eleccion)
-                
                 return result
             elif modo == 3:
                 ahora = datetime.now()
 
                 all_eleccion = Eleccion.query.filter(
                     (Eleccion.fecha > ahora.date()) |
-                    ((Eleccion.fecha == ahora.date()) & (Eleccion.hora_inicio > ahora.time))
+                    ((Eleccion.fecha == ahora.date()) & (Eleccion.hora_inicio > ahora.time()))
                 ).all()
 
                 result = eleccion_schemas.dump(all_eleccion)
+                print(result[0]['hora_inicio'])
+                print(ahora.time())
                 
                 return result
             elif modo == 4:
