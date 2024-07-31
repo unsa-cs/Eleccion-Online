@@ -130,28 +130,22 @@ class VotoServicioImpl(IVotoServicio):
         return result
 
 class CandidatoServicioImpl(ICandidatoServicio):
-    def get_candidatos_denegados(self):
-        candidatos = Candidato.query \
-            .filter(Candidato.denegado == True) \
-            .all()
-        result = []
-        for candidato in candidatos:
-            candidato_data = candidato_schema.dump(candidato)
-            result.append(candidato_data)
+    
+    def get_candidatos(self, estado):
+        candidatos = self.obtener_candidatos_filtrados(estado)
+        return self.transformar_candidatos(candidatos)
+    
+    def obtener_candidatos_filtrados(self, estado):
+        return Candidato.query.filter(Candidato.denegado == estado).all()
 
-        return result
+    def transformar_candidatos(self, candidatos):
+        return [candidato_schema.dump(candidato) for candidato in candidatos]
+
+    def get_candidatos_denegados(self):
+        return self.get_candidatos(True)
 
     def get_candidatos_inscritos(self):
-        candidatos = Candidato.query \
-            .filter(Candidato.denegado == False) \
-            .all()
-
-        result = []
-        for candidato in candidatos:
-            candidato_data = candidato_schema.dump(candidato)
-            result.append(candidato_data)
-
-        return result
+        return self.get_candidatos(False)
 
 class ListaServicioImpl(IListaServicio):
     def obtener_listas(self):
