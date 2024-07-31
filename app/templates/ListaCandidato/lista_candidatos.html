@@ -35,10 +35,10 @@
             </td>
             <td>
                 {% if lista.estado == 'pendiente' %}
-                    <button type="button" class="btn btn-success">
+                    <button type="button" class="btn btn-success" onclick="cambiarEstadoLista('{{ lista.id_lista }}', 'aprobar')">
                         <i class="fa fa-check"></i>
                     </button>
-                    <button type="button" class="btn btn-danger">
+                    <button type="button" class="btn btn-danger" onclick="cambiarEstadoLista('{{ lista.id_lista }}', 'desaprobar')">
                         <i class="fa fa-times"></i>
                     </button>
                 {% else %}
@@ -54,4 +54,6 @@
         {% endfor %}
     </tbody>
 </table>
+
+<script src="{{ url_for('static', filename='js/actualizar_estado.js') }}"></script>
 {% endblock %}

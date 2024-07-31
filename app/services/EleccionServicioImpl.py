@@ -8,6 +8,7 @@ from app.models.Eleccion import EleccionSchema
 from app.models.Candidato import Candidato
 from app.models.Candidato import CandidatoSchema
 from app.models.ListaCandidato import ListaCandidato
+from app.models.ListaCandidato import EstadoListaEnum
 from app.models.Elector import Elector
 from app.models.Voto import Voto
 from app.models.Propuesta import Propuesta
@@ -24,7 +25,6 @@ logger = logging.getLogger(__name__)
 eleccion_schema = EleccionSchema()
 eleccion_schemas = EleccionSchema(many = True)
 candidato_schema = CandidatoSchema()
-
 propuesta_schema = PropuestaSchema()
 
 class EleccionServicioImpl(IEleccionServicio):
@@ -177,4 +177,29 @@ class ListaServicioImpl(IListaServicio):
             return result
         except Exception as e:
             logger.error(f'Error al obtener las listas por elección: {str(e)}')
+            raise e
+    def aprobar_lista(self, id_lista):
+        try:
+            lista = ListaCandidato.query.filter_by(id_lista=id_lista).first()
+            if lista:
+                lista.estado = EstadoListaEnum.aprobado.value
+                db.session.commit()
+                return {"mensaje": "Lista aprobada exitosamente", "id_lista": lista.id_lista}
+            else:
+                return {"mensaje": "Lista no encontrada", "id_lista": id_lista}
+        except Exception as e:
+            logger.error(f'Error al aprobar la lista: {str(e)}')
+            raise e
+
+    def desaprobar_lista(self, id_lista):
+        try:
+            lista = ListaCandidato.query.filter_by(id_lista=id_lista).first()
+            if lista:
+                lista.estado = EstadoListaEnum.desaprobado.value
+                db.session.commit()
+                return {"mensaje": "Lista desaprobada exitosamente", "id_lista": lista.id_lista}
+            else:
+                return {"mensaje": "Lista no encontrada", "id_lista": id_lista}
+        except Exception as e:
+            logger.error(f'Error al desaprobar la lista: {str(e)}')
             raise e
