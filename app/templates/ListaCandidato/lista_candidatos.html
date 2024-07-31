@@ -11,6 +11,7 @@
             <th>Estado</th>
             <th>Propuestas</th>
             <th>Candidatos por Lista</th>
+            <th>Acciones</th>
         </tr>
     </thead>
     <tbody>         
@@ -72,8 +73,27 @@
                     </div>
                 </div>
             </td>
+            <td>
+                {% if lista.estado == 'pendiente' %}
+                    <button type="button" class="btn btn-success" onclick="cambiarEstadoLista('{{ lista.id_lista }}', 'aprobar')">
+                        <i class="fa fa-check"></i>
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="cambiarEstadoLista('{{ lista.id_lista }}', 'desaprobar')">
+                        <i class="fa fa-times"></i>
+                    </button>
+                {% else %}
+                    <button type="button" class="btn btn-success" disabled>
+                        <i class="fa fa-check"></i>
+                    </button>
+                    <button type="button" class="btn btn-danger" disabled>
+                        <i class="fa fa-times"></i>
+                    </button>
+                {% endif %}
+            </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+
+<script src="{{ url_for('static', filename='js/actualizar_estado.js') }}"></script>
 {% endblock %}

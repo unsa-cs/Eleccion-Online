@@ -80,9 +80,9 @@ class EleccionServicioImpl(IEleccionServicio):
                 Candidato.apellido_paterno, 
                 Candidato.apellido_materno, 
                 ListaCandidato.nombre, 
-                Candidato.id
+                Candidato.id_candidato
             ).join(
-                ListaCandidato, ListaCandidato.id_lista == Candidato.id_lista_candidato
+                ListaCandidato, ListaCandidato.id_lista == Candidato.id_lista
             ).filter(
                 ListaCandidato.id_eleccion == id_eleccion
             ).all()
@@ -115,6 +115,14 @@ class EleccionServicioImpl(IEleccionServicio):
         except Exception as e:
             logger.error(f'Error al obtener el elector por email: {str(e)}')
             raise e
+    def get_elecciones_hechas_por_elector(self, id_elector):
+        try:
+            elecciones = db.session.query(ListaCandidato.id_eleccion).join(Voto, ListaCandidato.id_lista == Voto.id_lista).filter(Voto.id_elector == id_elector).all()
+            result = [tupla[0] for tupla in elecciones]
+            return result
+        except Exception as e:
+            logger.error(f'Error al obtener las elecciones hechas por el elector: {str(e)}')
+            raise e
         
     def get_elecciones_hechas_por_elector(self, id_elector):
         try:
@@ -127,6 +135,7 @@ class EleccionServicioImpl(IEleccionServicio):
 
         
 class VotoServicioImpl(IVotoServicio):
+        
     def get_voto_by_elector(self, id_elector):
         try:
             voto = db.session.query(Elector.nombres).join(Voto, Elector.id == Voto.id_elector).filter(Elector.id == id_elector).all()
@@ -167,6 +176,17 @@ class VotoServicioImpl(IVotoServicio):
         return result
 
 class CandidatoServicioImpl(ICandidatoServicio):
+    
+    def get_candidatos(self, estado):
+        candidatos = self.obtener_candidatos_filtrados(estado)
+        return self.transformar_candidatos(candidatos)
+    
+    def obtener_candidatos_filtrados(self, estado):
+        return Candidato.query.filter(Candidato.denegado == estado).all()
+
+    def transformar_candidatos(self, candidatos):
+        return [candidato_schema.dump(candidato) for candidato in candidatos]
+
     def get_candidatos(self, estado):
         candidatos = self.obtener_candidatos_filtrados(estado)
         return self.transformar_candidatos(candidatos)
@@ -175,15 +195,7 @@ class CandidatoServicioImpl(ICandidatoServicio):
         return Candidato.query.filter(Candidato.denegado == estado).all()
     
     def get_candidatos_denegados(self):
-        candidatos = Candidato.query \
-            .filter(Candidato.denegado == True) \
-            .all()
-        result = []
-        for candidato in candidatos:
-            candidato_data = candidato_schema.dump(candidato)
-            result.append(candidato_data)
-
-        return result
+        return self.get_candidatos(True)
 
     def get_candidatos_inscritos(self):
         candidatos = Candidato.query \
