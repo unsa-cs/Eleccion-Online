@@ -4,29 +4,30 @@ El manejo de errores es esencial para que cualquier aplicación sea sólida y co
 
 ## Implementación:
 
-@home_bp.route('/inscripcion', methods=['GET', 'POST'])
-def listas():
-    if request.method == 'POST':
-        try:
-            for i in range(3):
-                nombre = request.form[f'nombre{i}']
-                estado = request.form[f'estado{i}']
-                id_eleccion = request.form[f'eleccion{i}']
 
-                if not nombre or not estado or not id_eleccion:
-                    raise ValueError("Todos los campos deben ser llenados.")
+  @home_bp.route('/inscripcion', methods=['GET', 'POST'])
+  def listas():
+      if request.method == 'POST':
+          try:
+              for i in range(3):
+                  nombre = request.form[f'nombre{i}']
+                  estado = request.form[f'estado{i}']
+                  id_eleccion = request.form[f'eleccion{i}']
 
-                nuevo_candidato = crear_candidato(nombre, estado, id_eleccion)
-                guardar_en_bd(nuevo_candidato)
-            return redirect(url_for('success_page'))
-        except ValueError as e:
-            flash(f"Error en los datos del formulario: {e}", "error")
-        except Exception as e:
-            db.session.rollback()
-            flash(f"Se produjo un error al guardar los datos: {e}", "error")
-        finally:
-            db.session.remove()
-    return render_template('inscripcion.html')
+                  if not nombre or not estado or not id_eleccion:
+                      raise ValueError("Todos los campos deben ser llenados.")
+
+                  nuevo_candidato = crear_candidato(nombre, estado, id_eleccion)
+                  guardar_en_bd(nuevo_candidato)
+              return redirect(url_for('success_page'))
+          except ValueError as e:
+              flash(f"Error en los datos del formulario: {e}", "error")
+          except Exception as e:
+              db.session.rollback()
+              flash(f"Se produjo un error al guardar los datos: {e}", "error")
+          finally:
+              db.session.remove()
+      return render_template('inscripcion.html')
 
 ## 2. Pipeline (Flujo de Datos)
 
@@ -34,13 +35,13 @@ def listas():
 
 ## Implementación:
 
-def crear_candidato(nombre, estado, id_eleccion):
-    nuevo_candidato = Candidato(nombre=nombre, estado=estado, id_eleccion=id_eleccion)
-    return nuevo_candidato
+  def crear_candidato(nombre, estado, id_eleccion):
+      nuevo_candidato = Candidato(nombre=nombre, estado=estado, id_eleccion=id_eleccion)
+      return nuevo_candidato
 
-def guardar_en_bd(candidato):
-    db.session.add(candidato)
-    db.session.commit()
+  def guardar_en_bd(candidato):
+      db.session.add(candidato)
+      db.session.commit()
 
 ## 3. Restful 
 
@@ -48,46 +49,46 @@ En una arquitectura RESTful, cada URL representa un recurso y utilizo los métod
 
 ## Implementación:
 
- @home_bp.route('/candidatos', methods=['POST'])
-def crear_candidato():
-    data = request.get_json()
-    try:
-        nombre = data.get('nombre')
-        estado = data.get('estado', EstadoListaEnum.pendiente.value)
-        id_eleccion = data.get('id_eleccion')
+  @home_bp.route('/candidatos', methods=['POST'])
+  def crear_candidato():
+      data = request.get_json()
+      try:
+          nombre = data.get('nombre')
+          estado = data.get('estado', EstadoListaEnum.pendiente.value)
+          id_eleccion = data.get('id_eleccion')
 
-        if not nombre or not id_eleccion:
-            abort(400, description="Todos los campos requeridos deben ser proporcionados.")
+          if not nombre or not id_eleccion:
+              abort(400, description="Todos los campos requeridos deben ser proporcionados.")
 
-        nuevo_candidato = Candidato(nombre=nombre, estado=estado, id_eleccion=id_eleccion)
-        db.session.add(nuevo_candidato)
-        db.session.commit()
-        return jsonify({'id': nuevo_candidato.id_lista}), 201
-    except Exception as e:
-        db.session.rollback()
-        abort(500, description=f"Error al crear el candidato: {e}")
+          nuevo_candidato = Candidato(nombre=nombre, estado=estado, id_eleccion=id_eleccion)
+          db.session.add(nuevo_candidato)
+          db.session.commit()
+          return jsonify({'id': nuevo_candidato.id_lista}), 201
+      except Exception as e:
+          db.session.rollback()
+          abort(500, description=f"Error al crear el candidato: {e}")
 
-@home_bp.route('/candidatos/<int:id>', methods=['GET'])
-def obtener_candidato(id):
-    candidato = Candidato.query.get(id)
-    if candidato is None:
-        abort(404, description="Candidato no encontrado.")
-    return jsonify({
-        'id': candidato.id_lista,
-        'nombre': candidato.nombre,
-        'estado': candidato.estado.value,
-        'id_eleccion': candidato.id_eleccion
-    })
+  @home_bp.route('/candidatos/<int:id>', methods=['GET'])
+  def obtener_candidato(id):
+      candidato = Candidato.query.get(id)
+      if candidato is None:
+          abort(404, description="Candidato no encontrado.")
+      return jsonify({
+          'id': candidato.id_lista,
+          'nombre': candidato.nombre,
+          'estado': candidato.estado.value,
+          'id_eleccion': candidato.id_eleccion
+      })
 
-@home_bp.route('/candidatos/<int:id>', methods=['DELETE'])
-def eliminar_candidato(id):
-    candidato = Candidato.query.get(id)
-    if candidato is None:
-        abort(404, description="Candidato no encontrado.")
-    try:
-        db.session.delete(candidato)
-        db.session.commit()
-        return '', 204
-    except Exception as e:
-        db.session.rollback()
-        abort(500, description=f"Error al eliminar el candidato: {e}")
+  @home_bp.route('/candidatos/<int:id>', methods=['DELETE'])
+  def eliminar_candidato(id):
+      candidato = Candidato.query.get(id)
+      if candidato is None:
+          abort(404, description="Candidato no encontrado.")
+      try:
+          db.session.delete(candidato)
+          db.session.commit()
+          return '', 204
+      except Exception as e:
+          db.session.rollback()
+          abort(500, description=f"Error al eliminar el candidato: {e}")
