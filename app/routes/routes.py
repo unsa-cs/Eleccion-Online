@@ -51,28 +51,6 @@ def listar_candidatos():
     listas_json = lista_servicio.obtener_listas()
     return render_template('ListaCandidato/lista_candidatos.html', listas=listas_json)
 
-@home_bp.route('/aprobar_lista/<int:id_lista>', methods=['POST'])
-#@login_required
-def aprobar_lista(id_lista):
-    try:
-        lista_servicio.aprobar_lista(id_lista)
-        flash('Lista aprobada exitosamente', 'success')
-    except Exception as e:
-        logger.error(f'Error al aprobar la lista: {str(e)}')
-        flash('Error al aprobar la lista', 'danger')
-    return redirect(url_for('home_bp.listar_candidatos'))
-
-@home_bp.route('/desaprobar_lista/<int:id_lista>', methods=['POST'])
-#@login_required
-def desaprobar_lista(id_lista):
-    try:
-        lista_servicio.desaprobar_lista(id_lista)
-        flash('Lista desaprobada exitosamente', 'success')
-    except Exception as e:
-        logger.error(f'Error al desaprobar la lista: {str(e)}')
-        flash('Error al desaprobar la lista', 'danger')
-    return redirect(url_for('home_bp.listar_candidatos'))
-
 
 @home_bp.route('/aprobar_lista/<int:id_lista>', methods=['POST'])
 #@login_required
