@@ -16,6 +16,9 @@ class IEleccionServicio(ABC):
     @abstractmethod
     def get_elector_by_email(self, email):
         pass
+    @abstractmethod
+    def get_elecciones_hechas_por_elector(self, id_elector):
+        pass
 
 class IVotoServicio(ABC):
     @abstractmethod
@@ -46,7 +49,9 @@ class IListaServicio(ABC):
     @abstractmethod
     def aprobar_lista(self, id_lista):
         pass
-
     @abstractmethod
     def desaprobar_lista(self, id_lista):
         pass
+    def get_lista_by_id(self, id_lista):
+        pass
+
