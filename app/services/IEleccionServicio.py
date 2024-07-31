@@ -47,5 +47,11 @@ class IListaServicio(ABC):
     def get_lista_by_eleccion(self, id_eleccion):
         pass
     @abstractmethod
+    def aprobar_lista(self, id_lista):
+        pass
+    @abstractmethod
+    def desaprobar_lista(self, id_lista):
+        pass
     def get_lista_by_id(self, id_lista):
         pass
+
