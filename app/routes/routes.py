@@ -15,6 +15,13 @@ from app.models.Candidato import Candidato
 from functools import wraps
 import logging
 
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+from werkzeug.security import check_password_hash
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -29,7 +36,16 @@ lista_servicio = ListaServicioImpl()
 candidato_servicio = CandidatoServicioImpl()
 voto_servicio = VotoServicioImpl()
 
-@home_bp.route('/Admin')
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('admin'):
+            return render_template('index.html')
+        return f(*args, **kwargs)
+    return decorated_function
+
+@home_bp.route('/Admins')
+@admin_required
 def home():
     return render_template('Admin/home.html')
 
@@ -67,6 +83,7 @@ def login_required(f):
             return redirect(url_for(LOGIN_ROUTE))
         return f(*args, **kwargs)
     return decorated_function
+
 
 @home_bp.route('/EleccionesActivas', methods=['GET'])
 def listar_elecciones():
@@ -136,7 +153,6 @@ def votar():
 def index():
     return render_template('index.html')
 
-
 @home_bp.route('/register', methods=['GET','POST'])
 def register():
     REGISTER_HTML = 'register.html'
@@ -171,6 +187,12 @@ def login():
             data = request.form
             correo = data.get('correo')
             contrasena = data.get('contrasena')
+            admin_email = os.getenv('ADMIN_EMAIL')
+            admin_password = os.getenv('ADMIN_PASSWORD')
+            if correo == admin_email and contrasena == check_password_hash(admin_password, contrasena):
+                session['correo'] = admin_email
+                session['admin'] = True
+                return render_template('Admin/home.html')
             elector = Elector.query.filter_by(correo=correo).first()
             voto = voto_servicio.get_voto_by_elector(elector.id)
             if elector and elector.revisar_contrasena(contrasena):
@@ -224,7 +246,6 @@ def mostrar_candidatos():
     candidatos_inscritos = candidato_servicio.get_candidatos_inscritos()
 
     return render_template(
-        'a/candidatos.html', 
+        'a/candidatos.html',
         candidatos_inscritos=candidatos_inscritos
     )
-
