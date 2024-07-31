@@ -32,7 +32,6 @@ class EleccionServicioImpl(IEleccionServicio):
         try:
             all_eleccion = Eleccion.query.all()
             result = eleccion_schemas.dump(all_eleccion)
-            print(result)
             return result
         except Exception as e:
             logger.error(f'Error al obtener todas las elecciones: {str(e)}')
@@ -79,10 +78,18 @@ class EleccionServicioImpl(IEleccionServicio):
         except Exception as e:
             logger.error(f'Error al obtener el elector por email: {str(e)}')
             raise e
-
+    def get_elecciones_hechas_por_elector(self, id_elector):
+        try:
+            elecciones = db.session.query(ListaCandidato.id_eleccion).join(Voto, ListaCandidato.id_lista == Voto.id_lista).filter(Voto.id_elector == id_elector).all()
+            result = [tupla[0] for tupla in elecciones]
+            return result
+        except Exception as e:
+            logger.error(f'Error al obtener las elecciones hechas por el elector: {str(e)}')
+            raise e
 
         
 class VotoServicioImpl(IVotoServicio):
+        
     def get_voto_by_elector(self, id_elector):
         try:
             voto = db.session.query(Elector.nombres).join(Voto, Elector.id == Voto.id_elector).filter(Elector.id == id_elector).all()
@@ -177,4 +184,12 @@ class ListaServicioImpl(IListaServicio):
             return result
         except Exception as e:
             logger.error(f'Error al obtener las listas por elección: {str(e)}')
+            raise e
+        
+    def get_lista_by_id(self, id_lista):
+        try:
+            listas = ListaCandidato.query.get(id_lista)
+            return listas
+        except Exception as e:
+            logger.error(f'Error al obtener la lista por id: {str(e)}')
             raise e

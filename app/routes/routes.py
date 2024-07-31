@@ -82,11 +82,10 @@ def ver_votos():
 @login_required
 def seleccionar_eleccion_votacion():
     elector = eleccion_servicio.get_elector_by_email(session['correo'])
-    voto = voto_servicio.get_voto_by_elector(elector.id)
-    if voto:
-        return redirect(url_for('home_bp.dashboard'))
-    elecciones_abiertas_json = eleccion_servicio.get_all_eleccion_abiertas()
-    return render_template('ProcesoVotacion/lista_eleccion_votacion.html', data = elecciones_abiertas_json)
+    elecciones = eleccion_servicio.get_all_eleccion()
+    elecciones_hechas = eleccion_servicio.get_elecciones_hechas_por_elector(elector.id)
+    elecciones_restantes = len(elecciones) - len(elecciones_hechas)
+    return render_template('ProcesoVotacion/lista_eleccion_votacion.html', data = elecciones, elecciones_hechas = elecciones_hechas, elecciones_restantes = elecciones_restantes)
 
 @home_bp.route('/CandidatosVotacion', methods=['POST'])
 @login_required
@@ -94,6 +93,14 @@ def ver_candidatos_votacion():
     id_eleccion = request.form['voto']
     candidatos = lista_servicio.get_lista_by_eleccion(id_eleccion)
     return render_template('ProcesoVotacion/votacion.html', data = candidatos)
+
+@home_bp.route('/Resumen', methods=['POST'])
+@login_required
+def resumir_votacion():
+    id_lista = request.form['id_lista']
+    lista = lista_servicio.get_lista_by_id(id_lista)
+    return render_template('ProcesoVotacion/resumen.html', data = lista)
+
 
 @home_bp.route('/Votar', methods=['POST'])
 @login_required
@@ -142,7 +149,6 @@ def login():
             data = request.form
             correo = data.get('correo')
             contrasena = data.get('contrasena')
-
             elector = Elector.query.filter_by(correo=correo).first()
             voto = voto_servicio.get_voto_by_elector(elector.id)
             if elector and elector.revisar_contrasena(contrasena):
@@ -161,7 +167,6 @@ def login():
 @home_bp.route('/dashboard')
 @login_required
 def dashboard():
-
     if 'correo' in session:
         elector = eleccion_servicio.get_elector_by_email(session['correo'])
         voto = voto_servicio.get_voto_by_elector(elector.id)
