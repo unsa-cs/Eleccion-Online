@@ -223,7 +223,7 @@ class ListaServicioImpl(IListaServicio):
             ).all()
 
             result = []
-
+            print(listas)
             for lista in listas:
                 propuestas = Propuesta.query.filter(
                     Propuesta.id_lista == lista.id_lista
@@ -253,8 +253,8 @@ class ListaServicioImpl(IListaServicio):
                         for candidato in candidatos
                     ]
                 }
-            result.append(lista_data)
-        
+                result.append(lista_data)
+            #print(result)
             return result
         except Exception as e:
             logger.error(f'Error al obtener las listas por elección: {str(e)}')
