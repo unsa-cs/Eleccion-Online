@@ -1,3 +1,92 @@
+# Estilos de Programacion
+## 1.Estilo Pipeline
+  El código de abajo sigue el estilo de Pipeline al construir un flujo claro de procesamiento de datos. Cada función en el pipeline tiene una responsabilidad específica:
+    
+  -Filtrado de datos con **obtener_candidatos_filtrados**.
+  
+  -Transformación de datos con **transformar_candidatos**.
+  
+  Esto permite un procesamiento modular y reutilizable, donde cada función puede ser probada y mantenida de forma independiente. La entrada inicial (estado) se transforma paso a paso hasta obtener el resultado     final deseado, lo cual es una característica clave del estilo Pipeline.
+```
+class CandidatoServicioImpl(ICandidatoServicio):
+    
+    def get_candidatos(self, estado):
+        candidatos = self.obtener_candidatos_filtrados(estado)
+        return self.transformar_candidatos(candidatos)
+    
+    def obtener_candidatos_filtrados(self, estado):
+        return Candidato.query.filter(Candidato.denegado == estado).all()
+
+    def transformar_candidatos(self, candidatos):
+        return [candidato_schema.dump(candidato) for candidato in candidatos]
+
+    def get_candidatos_denegados(self):
+        return self.get_candidatos(True)
+
+    def get_candidatos_inscritos(self):
+        return self.get_candidatos(False)
+```
+## 2.Estilo de Error/Exception Handling
+  El siguiente código de **aprobar_lista** está diseñado principalmente con un enfoque en Error/Exception Handling. Maneja errores que pueden ocurrir durante la consulta de la base de datos y el compromiso de la   transacción, registrando errores y asegurando que se manejen adecuadamente. 
+  ```
+  def aprobar_lista(self, id_lista):
+        try:
+            lista = ListaCandidato.query.filter_by(id_lista=id_lista).first()
+            if lista:
+                lista.estado = EstadoListaEnum.aprobado.value
+                db.session.commit()
+                return {"mensaje": "Lista aprobada exitosamente", "id_lista": lista.id_lista}
+            else:
+                return {"mensaje": "Lista no encontrada", "id_lista": id_lista}
+        except Exception as e:
+            logger.error(f'Error al aprobar la lista: {str(e)}')
+            raise e
+  ```
+## 3.Estilo RESTful
+  El siguiente código JavaScript sigue el estilo RESTful porque define URLs que representan recursos y acciones específicas en un sistema RESTful. Usa el método HTTP PUT para actualizar el estado de un recurso     existente. Por ultimo maneja las respuestas y errores de manera adecuada, conforme a las prácticas estándar de RESTful.
+  ```
+   function cambiarEstadoLista(id_lista, accion) {
+      let url = '';
+      let metodo = '';
+      let mensajeExito = '';
+  
+      if (accion === 'aprobar') {
+          url = `/listas/${id_lista}/aprobar`;
+          metodo = 'PUT';  
+          mensajeExito = 'Lista aprobada correctamente';
+      } else if (accion === 'desaprobar') {
+          url = `/listas/${id_lista}/desaprobar`;
+          metodo = 'PUT'; 
+          mensajeExito = 'Lista desaprobada correctamente';
+      } else {
+          alert('Acción no válida');
+          return;
+      }
+  
+      fetch(url, {
+          method: metodo,
+          headers: {
+              'Content-Type': 'application/json'
+          },
+      })
+      .then(response => {
+          if (response.ok) {
+              return response.json();
+          } else {
+              return response.text().then(text => {throw new Error(text)});
+          }
+      })
+      .then(data => {
+          alert(mensajeExito);
+          location.reload();
+      })
+      .catch(error => {
+          console.error('Error:', error);
+          alert('Error al cambiar el estado de la lista');
+      });
+   }
+  ```
+
 **CLEAN CODE**
 
 -Nombres:
