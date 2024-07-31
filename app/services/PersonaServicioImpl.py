@@ -60,3 +60,4 @@ class ElectorServiceImpl(ElectorService):
             db.session.rollback()
             logger.error(f'Error al eliminar el elector: {str(e)}')
             raise e
+        
