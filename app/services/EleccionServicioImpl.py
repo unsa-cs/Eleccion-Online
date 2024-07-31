@@ -188,10 +188,6 @@ class CandidatoServicioImpl(ICandidatoServicio):
     def transformar_candidatos(self, candidatos):
         return [candidato_schema.dump(candidato) for candidato in candidatos]
 
-    def get_candidatos(self, estado):
-        candidatos = self.obtener_candidatos_filtrados(estado)
-        return self.transformar_candidatos(candidatos)
-
     def obtener_candidatos_filtrados(self, estado):
         return Candidato.query.filter(Candidato.denegado == estado).all()
     

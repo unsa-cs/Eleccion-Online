@@ -48,7 +48,6 @@ def mostrar_elecciones():
 @home_bp.route('/ListasCandidatos', methods=['GET'])
 def listar_candidatos():
     listas_json = lista_servicio.obtener_listas()
-    listas_json = lista_servicio.obtener_listas()
     return render_template('ListaCandidato/lista_candidatos.html', listas=listas_json)
 
 
@@ -164,7 +163,6 @@ def resumir_votacion():
     id_lista = request.form['id_lista']
     lista = lista_servicio.get_lista_by_id(id_lista)
     return render_template('ProcesoVotacion/resumen.html', data = lista)
-
 
 
 @home_bp.route('/Votar', methods=['POST'])
