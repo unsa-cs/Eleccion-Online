@@ -201,3 +201,18 @@ def mostrar_candidatos():
         candidatos_inscritos=candidatos_inscritos
     )
 
+@home_bp.route('/inscripcion')
+def listas():
+    if request.method == 'POST':
+        for i in range(3):
+            nombre = request.form[f'nombre{i}']
+            estado = request.form[f'estado{i}']
+            id_eleccion = request.form[f'eleccion{i}']
+
+            nuevo_candidato = ListaCandidato(nombre=nombre, id_eleccion=id_eleccion, estado=estado )
+            db.session.add(nuevo_candidato)
+        db.session.commit()
+        mensaje = 'Elector creado correctamente'
+        return render_template(inscripcion.html, mensaje=mensaje)
+
+    return render_template('inscripcion.html')
