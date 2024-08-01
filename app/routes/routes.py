@@ -53,6 +53,7 @@ def admin_required(f):
     return decorated_function_admin
 
 @home_bp.route('/Admins')
+@admin_required
 def home():
     return render_template('Admin/home.html')
 
