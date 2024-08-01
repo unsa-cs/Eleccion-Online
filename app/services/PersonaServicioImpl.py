@@ -1,4 +1,5 @@
 import logging
+
 from app.models.Elector import Elector
 from app import db
 from app.services.IPersonaServicio import ElectorService
