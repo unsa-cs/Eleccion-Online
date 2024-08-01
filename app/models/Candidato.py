@@ -7,18 +7,20 @@ class Candidato(db.Model):
     nombres = db.Column(db.String(100), nullable=False)
     apellido_paterno = db.Column(db.String(100), nullable=False)
     apellido_materno = db.Column(db.String(100), nullable=False)
-    rol = db.Column(db.String(100), nullable=False)
     denegado = db.Column(db.Boolean, nullable=True, default=False)
+    rol = db.Column(db.String(100), nullable=False)
     id_lista = db.Column(db.Integer, db.ForeignKey('listacandidato.id_lista'),nullable=True)
+
+    lista_candidato = db.relationship('ListaCandidato', backref='candidatos_list', lazy=True)
     
-    def __init__(self, nombres, apellido_paterno, apellido_materno, rol, id_lista_canditado,denegado=False):
+    def __init__(self, nombres, apellido_paterno, apellido_materno,rol, id_lista_candidato,denegado=False):
         self.nombres = nombres
         self.apellido_paterno = apellido_paterno
         self.apellido_materno = apellido_materno
-        self.id_lista = id_lista_canditado
         self.denegado = denegado
         self.rol = rol
-
+        self.id_lista = id_lista_candidato
+    
 class CandidatoSchema(ma.Schema):
     class Meta:
         fields = (
@@ -26,7 +28,7 @@ class CandidatoSchema(ma.Schema):
             'nombres',
             'apellido_paterno',
             'apellido_materno',
-            'rol',
             'denegado',
+            'rol',
             'id_lista'
         )
