@@ -64,15 +64,15 @@ El propósito de este proyecto es desarrollar una aplicación web de votaciones 
 
 ### Funcionalidades: Diagrama de Casos de Uso, Funcionalidades de Alto Nivel y Prototipo (o GUI)
 
-![Diagrama](img/img1.jpeg)
+![Diagrama](img/modelo_usos.jpg)
 
 #### Modelo de Dominio: Diagrama de Clases y Módulos
 
-![Diagrama](img/img1.jpeg)
+![Diagrama](img/modelo_dominio.jpg)
 
 #### Arquitectura y Patrones: Diagrama de Componentes o Paquetes
 
-![Diagrama](img/img1.jpeg)
+![Diagrama](img/modelo_componentes.jpg)
 
 ### **Prácticas de codificación limpia aplicadas:**
 
