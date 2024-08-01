@@ -1,4 +1,7 @@
-from flask import render_template, Blueprint, request, jsonify, session, redirect, url_for, make_response, flash
+import logging
+from functools import wraps
+
+from flask import render_template, Blueprint, request, jsonify, session, redirect, url_for, make_response, flash, abort
 from flask_login import login_user, logout_user, login_required, login_manager
 
 from app.services.PersonaServicioImpl import ElectorServiceImpl
@@ -11,14 +14,14 @@ from app.models.Elector import Elector
 from app.models.Eleccion import Eleccion
 from app.models.ListaCandidato import ListaCandidato
 from app.models.Candidato import Candidato
+from app.services.PersonaServicioImpl import ElectorServiceImpl
+from app.services.EleccionServicioImpl import EleccionServicioImpl
 
-from functools import wraps
-import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-REGISTER_TEMPLATE = 'register.html'
+##REGISTER_TEMPLATE = 'register.html'
 LOGIN_ROUTE = 'home_bp.login'
 
 home_bp = Blueprint('home_bp', __name__, template_folder='templates')
@@ -33,10 +36,20 @@ voto_servicio = VotoServicioImpl()
 def home():
     return render_template('Admin/home.html')
 
+
+@home_bp.route('/ListaElecciones', methods=['GET'])
+def mostrar_elecciones():
+    eleccionesf = eleccion_servicio.get_all_eleccion(1)
+    eleccionescurso = eleccion_servicio.get_all_eleccion(2)
+    eleccionespro = eleccion_servicio.get_all_eleccion(3)
+    return render_template('a/elecciones.html', eleccionespro=eleccionespro, eleccionesf=eleccionesf, eleccionescurso=eleccionescurso)
+
+
 @home_bp.route('/ListasCandidatos', methods=['GET'])
 def listar_candidatos():
     listas_json = lista_servicio.obtener_listas()
     return render_template('ListaCandidato/lista_candidatos.html', listas=listas_json)
+
 
 @home_bp.route('/aprobar_lista/<int:id_lista>', methods=['POST'])
 #@login_required
@@ -49,6 +62,7 @@ def aprobar_lista(id_lista):
         flash('Error al aprobar la lista', 'danger')
     return redirect(url_for('home_bp.listar_candidatos'))
 
+
 @home_bp.route('/desaprobar_lista/<int:id_lista>', methods=['POST'])
 #@login_required
 def desaprobar_lista(id_lista):
@@ -60,6 +74,7 @@ def desaprobar_lista(id_lista):
         flash('Error al desaprobar la lista', 'danger')
     return redirect(url_for('home_bp.listar_candidatos'))
 
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -68,10 +83,26 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-@home_bp.route('/EleccionesActivas', methods=['GET'])
+
+@home_bp.route('/ListasEleccionesVista', methods=['GET'])
+def listar_candidatos_elector():
+    listas = lista_servicio.obtener_listas_aprobadas()
+    return render_template('ListaCandidato/listas_aprobadas.html', listas = listas)
+
+
+@home_bp.route('/EleccionesActivas', methods=['GET'])       
 def listar_elecciones():
-    elecciones_json = eleccion_servicio.get_all_eleccion()
+    elecciones_json = eleccion_servicio.get_all_eleccion(4)
     return render_template('lista_eleccion.html', elecciones = elecciones_json)
+
+
+@home_bp.route('/candidatos/<int:id>', methods=['GET'])
+def ver_lista_candidatos(id):
+    listas_candidato = lista_servicio.get_lista_por_eleccion(id)
+    
+    if listas_candidato is None:
+        abort(404)  
+    return render_template('ListaCandidato/lista_candidatos.html', listas=listas_candidato)
 
 @home_bp.route('/ListasEleccionesVista', methods=['GET'])
 def listas_candidatos_elector():
@@ -84,9 +115,11 @@ def ver_candidatos():
     result = lista_servicio.get_lista_by_eleccion(id_eleccion)
     return render_template("lista_candidatos.html", data = result)
 
+
 @home_bp.route('/FormularioEleccion', methods=['GET'])
 def agregar_eleccion():
     return render_template("ProcesoVotacion/form_eleccion.html")
+
 
 @home_bp.route('/InsertEleccion', methods=['POST'])
 def insert_eleccion():
@@ -98,6 +131,7 @@ def insert_eleccion():
     eleccion = Eleccion(fecha, hora_inicio, hora_fin, estado, descripcion)
     eleccion_servicio.insert_eleccion(eleccion)
     return url_for('home_bp.listar_elecciones')
+
 
 @home_bp.route('/Votos')
 def ver_votos():
@@ -112,6 +146,7 @@ def ver_votos():
 @home_bp.route('/EleccionVotacion', methods=['GET'])
 @login_required
 def seleccionar_eleccion_votacion():
+<<<<<<< HEAD
     elector = elector_service.get_elector_by_email(session['correo'])
     elecciones = eleccion_servicio.get_all_eleccion()
     elecciones_hechas = eleccion_servicio.get_elecciones_hechas_por_elector(elector.id)
@@ -119,6 +154,15 @@ def seleccionar_eleccion_votacion():
     return render_template('ProcesoVotacion/lista_eleccion_votacion.html', \
                            data = elecciones, elecciones_hechas = elecciones_hechas, \
                             elecciones_restantes = elecciones_restantes)
+=======
+    elector = eleccion_servicio.get_elector_by_email(session['correo'])
+    voto = voto_servicio.get_voto_by_elector(elector.id)
+    if voto:
+        return redirect(url_for('home_bp.dashboard'))
+    elecciones_abiertas_json = eleccion_servicio.get_all_eleccion_abiertas()
+    return render_template('ProcesoVotacion/lista_eleccion_votacion.html', data = elecciones_abiertas_json)
+
+>>>>>>> 0f4d24298951cb58173c158ada7a7083cd29437c
 
 @home_bp.route('/ListaVotacion', methods=['POST'])
 @login_required
@@ -142,6 +186,7 @@ def votar():
     elector = elector_service.get_elector_by_email(session['correo'])
     voto_servicio.votar(id_lista, elector.id)
     return redirect(url_for('home_bp.dashboard'))
+
 
 @home_bp.route('/')
 def index():
@@ -174,6 +219,7 @@ def register():
         logger.error(mensaje_error)
         return render_template(REGISTER_HTML, mensaje=mensaje_error)
 
+
 @home_bp.route('/login', methods=['GET','POST'])
 def login():
     LOGIN_HTML = 'login.html'
@@ -197,6 +243,7 @@ def login():
         logger.error(mensaje_error)
         return render_template(LOGIN_HTML, mensaje=mensaje_error)
 
+
 @home_bp.route('/dashboard')
 @login_required
 def dashboard():
@@ -210,6 +257,7 @@ def dashboard():
     logger.warning('El usuario no ha iniciado sesión')
     return redirect(url_for(LOGIN_ROUTE))
 
+
 @home_bp.route('/logout')
 def logout():
     if 'correo' in session:
@@ -218,6 +266,25 @@ def logout():
         session.clear()
     return redirect(url_for(LOGIN_ROUTE))
 
+<<<<<<< HEAD
+=======
+
+@home_bp.route('/electores/<int:id>', methods=['GET'])
+def get_elector(id):
+    return
+
+
+@home_bp.route('/electores/<int:id>', methods=['PUT'])
+def actualizar_elector(id):
+    return
+
+
+@home_bp.route('/electores/<int:id>', methods=['DELETE'])
+def eliminar_elector(id):
+    return
+
+
+>>>>>>> 0f4d24298951cb58173c158ada7a7083cd29437c
 @home_bp.route('/candidatos')
 def mostrar_candidatos():
     candidatos_inscritos = candidato_servicio.get_candidatos_inscritos()
