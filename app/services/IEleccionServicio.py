@@ -83,3 +83,15 @@ class IListaServicio(ABC):
     @abstractmethod
     def get_all_eleccion_abiertas(self):
         pass
+    
+    @abstractmethod
+    def insert_lista_candidato(self):
+        pass
+    
+    @abstractmethod
+    def insert_candidato(self):
+        pass
+    
+    @abstractmethod
+    def insert_propuesta(self):
+        pass

@@ -53,6 +53,7 @@ def admin_required(f):
     return decorated_function_admin
 
 @home_bp.route('/Admins')
+@admin_required
 def home():
     return render_template('Admin/home.html')
 
@@ -102,6 +103,11 @@ def listar_candidatos_elector():
     listas = lista_servicio.obtener_listas_aprobadas()
     return render_template('ListaCandidato/listas_aprobadas.html', listas = listas)
 
+@home_bp.route('/ListasElecciones', methods=['GET'])
+def listas_candidatos_elector():
+    listas = lista_servicio.obtener_listas_aprobadas()
+    return render_template('ListaCandidato/listas_aprobadas.html', listas = listas)
+
 
 
 @home_bp.route('/EleccionesActivas', methods=['GET'])
@@ -117,11 +123,6 @@ def ver_lista_candidatos(id):
     if listas_candidato is None:
         abort(404)
     return render_template('ListaCandidato/lista_candidatos.html', listas=listas_candidato)
-
-@home_bp.route('/ListasEleccionesVista', methods=['GET'])
-def listas_candidatos_elector():
-    listas = lista_servicio.obtener_listas_aprobadas()
-    return render_template('ListaCandidato/listas_aprobadas.html', listas = listas)
 
 @home_bp.route('/VerListas', methods=['GET'])
 def ver_candidatos():
@@ -292,7 +293,6 @@ def listas():
 
         id_lista = lista_candidato.id_lista
 
-        listpropuestas = []
         propuestas = request.form.getlist('propuestas[]')
         for propuesta in propuestas:
             if propuesta: 
@@ -300,30 +300,23 @@ def listas():
                     descripcion=propuesta,
                     id_lista=id_lista
                 )
-                listpropuestas.append(nueva_propuesta)
                 lista_servicio.insert_propuesta(nueva_propuesta)
         
-        listcandidatos = []
-
-
         for i in range(4):
             nombre = request.form.get(f'nombre{i}')
             apellido_paterno = request.form.get(f'apellido_paterno{i}')
             apellido_materno = request.form.get(f'apellido_materno{i}')
-            dni = request.form.get(f'dni{i}')
             
             rol_ = "asesor" if i != 0 else "presidente"
             candidato = Candidato(
-                dni=dni,
                 nombres=nombre,
                 apellido_paterno=apellido_paterno,
                 apellido_materno=apellido_materno,
                 rol=rol_,
-                id_lista=id_lista
+                id_lista_candidato=id_lista
 
             )
             lista_servicio.insert_candidato(candidato)
-            listcandidatos.append(candidato)
 
 
         flash('Candidatos y propuestas registrados con éxito', 'success')
