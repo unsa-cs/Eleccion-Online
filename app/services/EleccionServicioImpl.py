@@ -79,15 +79,6 @@ class EleccionServicioImpl(IEleccionServicio):
             logger.error(f'Error al obtener los candidatos por elección: {str(e)}')
             raise e
         
-    def get_all_eleccion_abiertas(self):
-        try:
-            all_eleccion = Eleccion.query.filter(Eleccion.estado == "abierto").all()
-            result = eleccion_schemas.dump(all_eleccion)
-            return result
-        except Exception as e:
-            logger.error(f'Error al obtener todas las elecciones abiertas: {str(e)}')
-            raise e
-        
     def insert_eleccion(self, eleccion):
         try:
             db.session.add(eleccion)
