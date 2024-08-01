@@ -1,5 +1,6 @@
-import datetime
+from datetime import datetime
 import logging
+
 from app import db
 from flask import jsonify
 from sqlalchemy import func
@@ -33,50 +34,30 @@ lista_candidato_schema = ListaCandidatoSchema()
 
 class EleccionServicioImpl(IEleccionServicio):
 
-    def get_all_eleccion(self, modo):
-        try:
-            if modo == 1:
-                ahora = datetime.now()
+    def get_elecciones_past(self):
+        ahora = datetime.now()
+        return Eleccion.query.filter(
+            (Eleccion.fecha < ahora.date()) |
+            ((Eleccion.fecha == ahora.date()) & (Eleccion.hora_fin < ahora.time()))
+        ).all()
 
-                all_eleccion = Eleccion.query.filter(
-                    (Eleccion.fecha < ahora.date()) |
-                    ((Eleccion.fecha == ahora.date()) & (Eleccion.hora_fin < ahora.time()))
-                ).all()
+    def get_elecciones_en_curso(self):
+        ahora = datetime.now()
+        return Eleccion.query.filter(
+            ((Eleccion.fecha == ahora.date()) & 
+            (Eleccion.hora_inicio < ahora.time()) & 
+            (Eleccion.hora_fin > ahora.time()))
+        ).all()
 
-                result = eleccion_schemas.dump(all_eleccion)
-                
-                return result
-            elif modo == 2:
-                ahora = datetime.now()
+    def get_elecciones_futuras(self):
+        ahora = datetime.now()
+        return Eleccion.query.filter(
+            (Eleccion.fecha > ahora.date()) |
+            ((Eleccion.fecha == ahora.date()) & (Eleccion.hora_inicio > ahora.time()))
+        ).all()
 
-                all_eleccion = Eleccion.query.filter(
-                    ((Eleccion.fecha == ahora.date()) & (Eleccion.hora_inicio < ahora.time()) & (Eleccion.hora_fin > ahora.time()))
-                ).all()
-
-                result = eleccion_schemas.dump(all_eleccion)
-                return result
-            elif modo == 3:
-                ahora = datetime.now()
-
-                all_eleccion = Eleccion.query.filter(
-                    (Eleccion.fecha > ahora.date()) |
-                    ((Eleccion.fecha == ahora.date()) & (Eleccion.hora_inicio > ahora.time()))
-                ).all()
-
-                result = eleccion_schemas.dump(all_eleccion)
-
-                
-                return result
-            elif modo == 4:
-                
-                    all_eleccion = Eleccion.query.all()
-                    result = eleccion_schemas.dump(all_eleccion)
-
-                    return result
-                
-        except Exception as e:
-            logger.error(f'Error al obtener las elecciones: {str(e)}')
-            raise e
+    def get_all_eleccion(self):
+        return Eleccion.query.all()
     
     def get_candidatos_by_eleccion(self, id_eleccion):
         try:
@@ -132,6 +113,7 @@ class EleccionServicioImpl(IEleccionServicio):
         except Exception as e:
             logger.error(f'Error al obtener las elecciones hechas por el elector: {str(e)}')
             raise e
+        
     def get_all_elecciones(self):
         try:
             all_eleccion = Eleccion.query.all()
@@ -140,6 +122,7 @@ class EleccionServicioImpl(IEleccionServicio):
         except Exception as e:
             logger.error(f'Error al obtener todas las elecciones: {str(e)}')
             raise e
+
 
 class VotoServicioImpl(IVotoServicio):
         

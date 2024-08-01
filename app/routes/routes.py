@@ -48,7 +48,7 @@ def admin_required(f):
         logger.info(f"Verificando acceso: sesión actual {session}")
         if not session.get('admin'):
             logger.info(f"Usuario no autorizado, sesión: {session}")
-            return render_template("login.html")  # Redirige a la ruta 'index' o la ruta de inicio
+            return render_template("login.html")  
         return f(*args, **kwargs)
     return decorated_function_admin
 
@@ -60,9 +60,9 @@ def home():
 
 @home_bp.route('/ListaElecciones', methods=['GET'])
 def mostrar_elecciones():
-    eleccionesf = eleccion_servicio.get_all_eleccion(1)
-    eleccionescurso = eleccion_servicio.get_all_eleccion(2)
-    eleccionespro = eleccion_servicio.get_all_eleccion(3)
+    eleccionesf = eleccion_servicio.get_elecciones_past()
+    eleccionescurso = eleccion_servicio.get_elecciones_en_curso()
+    eleccionespro = eleccion_servicio.get_elecciones_futuras()
     return render_template('a/elecciones.html', eleccionespro=eleccionespro, eleccionesf=eleccionesf, eleccionescurso=eleccionescurso)
 
 
@@ -107,7 +107,7 @@ def listar_candidatos_elector():
 
 @home_bp.route('/EleccionesActivas', methods=['GET'])
 def listar_elecciones():
-    elecciones_json = eleccion_servicio.get_all_eleccion(4)
+    elecciones_json = eleccion_servicio.get_all_eleccion()
     return render_template('lista_eleccion.html', elecciones = elecciones_json)
 
 
