@@ -4,6 +4,7 @@ from datetime import datetime
 from flask import jsonify
 from sqlalchemy import func
 from sqlalchemy.orm import aliased
+from sqlalchemy.exc import SQLAlchemyError
 
 from app import db
 from app.models.Eleccion import Eleccion
@@ -29,8 +30,9 @@ propuesta_schema = PropuestaSchema()
 lista_candidato_schema = ListaCandidatoSchema()
 
 class EleccionServicioImpl(IEleccionServicio):
-    try:
-        def get_all_eleccion(self, modo):
+
+    def get_all_eleccion(self, modo):
+        try:
             if modo == 1:
                 ahora = datetime.now()
 
@@ -60,20 +62,20 @@ class EleccionServicioImpl(IEleccionServicio):
                 ).all()
 
                 result = eleccion_schemas.dump(all_eleccion)
-                print(result[0]['hora_inicio'])
-                print(ahora.time())
+
                 
                 return result
             elif modo == 4:
                 
                     all_eleccion = Eleccion.query.all()
                     result = eleccion_schemas.dump(all_eleccion)
-                    print(result)
+
                     return result
-    except Exception as e:
-        logger.error(f'Error al obtener todas las elecciones: {str(e)}')
-        raise e
-        
+                
+        except Exception as e:
+            logger.error(f'Error al obtener las elecciones: {str(e)}')
+            raise e
+    
     def get_candidatos_by_eleccion(self, id_eleccion):
         try:
             all_candidatos = db.session.query(
@@ -333,3 +335,30 @@ class ListaServicioImpl(IListaServicio):
             resultado.append(lista_info)
 
         return resultado
+    
+    def insert_lista_candidato(lista):
+        try:
+            db.session.add(lista)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            print(f"Error en la inserción de la lista: {e}")
+            raise e
+
+    def insert_candidato(candidato):
+        try:
+            db.session.add(candidato)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            print(f"Error en la inserción del candidato: {e}")
+            raise e
+
+    def insert_propuesta(propuesta):
+        try:
+            db.session.add(propuesta)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            print(f"Error en la inserción de la propuesta: {e}")
+            raise e     
