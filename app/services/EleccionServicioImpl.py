@@ -1,9 +1,11 @@
 from datetime import datetime
 import logging
+
 from app import db
 from flask import jsonify
 from sqlalchemy import func
 from sqlalchemy.orm import aliased
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.models.Eleccion import Eleccion
@@ -31,51 +33,32 @@ propuesta_schema = PropuestaSchema()
 lista_candidato_schema = ListaCandidatoSchema()
 
 class EleccionServicioImpl(IEleccionServicio):
-    try:
-        def get_all_eleccion(self, modo):
-            if modo == 1:
-                ahora = datetime.now()
 
-                all_eleccion = Eleccion.query.filter(
-                    (Eleccion.fecha < ahora.date()) |
-                    ((Eleccion.fecha == ahora.date()) & (Eleccion.hora_fin < ahora.time()))
-                ).all()
+    def get_elecciones_past(self):
+        ahora = datetime.now()
+        return Eleccion.query.filter(
+            (Eleccion.fecha < ahora.date()) |
+            ((Eleccion.fecha == ahora.date()) & (Eleccion.hora_fin < ahora.time()))
+        ).all()
 
-                result = eleccion_schemas.dump(all_eleccion)
-                
-                return result
-            elif modo == 2:
-                ahora = datetime.now()
+    def get_elecciones_en_curso(self):
+        ahora = datetime.now()
+        return Eleccion.query.filter(
+            ((Eleccion.fecha == ahora.date()) & 
+            (Eleccion.hora_inicio < ahora.time()) & 
+            (Eleccion.hora_fin > ahora.time()))
+        ).all()
 
-                all_eleccion = Eleccion.query.filter(
-                    ((Eleccion.fecha == ahora.date()) & (Eleccion.hora_inicio < ahora.time()) & (Eleccion.hora_fin > ahora.time()))
-                ).all()
+    def get_elecciones_futuras(self):
+        ahora = datetime.now()
+        return Eleccion.query.filter(
+            (Eleccion.fecha > ahora.date()) |
+            ((Eleccion.fecha == ahora.date()) & (Eleccion.hora_inicio > ahora.time()))
+        ).all()
 
-                result = eleccion_schemas.dump(all_eleccion)
-                return result
-            elif modo == 3:
-                ahora = datetime.now()
-
-                all_eleccion = Eleccion.query.filter(
-                    (Eleccion.fecha > ahora.date()) |
-                    ((Eleccion.fecha == ahora.date()) & (Eleccion.hora_inicio > ahora.time()))
-                ).all()
-
-                result = eleccion_schemas.dump(all_eleccion)
-                print(result[0]['hora_inicio'])
-                print(ahora.time())
-                
-                return result
-            elif modo == 4:
-                
-                    all_eleccion = Eleccion.query.all()
-                    result = eleccion_schemas.dump(all_eleccion)
-                    print(result)
-                    return result
-    except Exception as e:
-        logger.error(f'Error al obtener todas las elecciones: {str(e)}')
-        raise e
-        
+    def get_all_eleccion(self):
+        return Eleccion.query.all()
+    
     def get_candidatos_by_eleccion(self, id_eleccion):
         try:
             all_candidatos = db.session.query(
@@ -95,14 +78,7 @@ class EleccionServicioImpl(IEleccionServicio):
         except Exception as e:
             logger.error(f'Error al obtener los candidatos por elección: {str(e)}')
             raise e
-    def get_all_eleccion_abiertas(self):
-        try:
-            all_eleccion = Eleccion.query.filter(Eleccion.estado == "abierto").all()
-            result = eleccion_schemas.dump(all_eleccion)
-            return result
-        except Exception as e:
-            logger.error(f'Error al obtener todas las elecciones abiertas: {str(e)}')
-            raise e
+        
     def insert_eleccion(self, eleccion):
         try:
             db.session.add(eleccion)
@@ -130,6 +106,7 @@ class EleccionServicioImpl(IEleccionServicio):
         except Exception as e:
             logger.error(f'Error al obtener las elecciones hechas por el elector: {str(e)}')
             raise e
+        
     def get_all_elecciones(self):
         try:
             all_eleccion = Eleccion.query.all()
@@ -138,6 +115,7 @@ class EleccionServicioImpl(IEleccionServicio):
         except Exception as e:
             logger.error(f'Error al obtener todas las elecciones: {str(e)}')
             raise e
+
 
 class VotoServicioImpl(IVotoServicio):
         
@@ -150,6 +128,7 @@ class VotoServicioImpl(IVotoServicio):
         except Exception as e:
             logger.error(f'Error al obtener el voto del elector: {str(e)}')
             raise e
+        
     def votar(self, id_lista, id_elector):
         try:
             voto = Voto(id_elector, id_lista)
@@ -160,6 +139,7 @@ class VotoServicioImpl(IVotoServicio):
             db.session.rollback()
             logger.error(f'Error al registrar el voto: {str(e)}')
             raise e
+        
     def get_all_votos(self):
         votos = db.session.query(
             Elector.nombres,
@@ -215,16 +195,14 @@ class CandidatoServicioImpl(ICandidatoServicio):
         return self.get_candidatos(True)
 
     def get_candidatos_inscritos(self):
-        candidatos = Candidato.query \
-            .filter(Candidato.denegado == False) \
-            .all()
+        try:
+            candidatos = Candidato.query.all()
+            result = [candidato_schema.dump(candidato) for candidato in candidatos]
+            return result  
+        except Exception as e:
+            logger.error(f'Error al obtener candidatos inscritos: {str(e)}')
+            raise e
 
-        result = []
-        for candidato in candidatos:
-            candidato_data = candidato_schema.dump(candidato)
-            result.append(candidato_data)
-
-        return result
 
 class ListaServicioImpl(IListaServicio):
     def obtener_listas(self):
@@ -235,7 +213,7 @@ class ListaServicioImpl(IListaServicio):
             lista_info = {
                 'id_lista': lista.id_lista,
                 'nombre': lista.nombre,
-                'estado': lista.estado.value,
+                'estado': lista.estado,
                 'id_eleccion': lista.id_eleccion,
                 'propuestas': [{'descripcion': propuesta.descripcion} for propuesta in lista.propuestas],
                 'candidatos': [{'nombre': f"{candidato.nombres} {candidato.apellido_paterno} {candidato.apellido_materno}"} for candidato in lista.candidatos]
@@ -286,6 +264,7 @@ class ListaServicioImpl(IListaServicio):
             db.session.rollback()
             print(f"Error en la inserción de la propuesta: {e}")
             raise e
+        
     def get_all_eleccion_abiertas(self):
         try:
             all_eleccion = Eleccion.query.filter(Eleccion.estado == "abierto").all()
@@ -360,13 +339,12 @@ class ListaServicioImpl(IListaServicio):
             if lista:
                 lista.estado = EstadoListaEnum.desaprobado.value
             Propuesta.query.filter_by(id_lista=id_lista).update({"denegada": True})
-            Candidato.query.filter_by(id_lista=id_lista).update({"denegado": True})
             db.session.commit()
-            return {"mensaje": "Lista aprobada exitosamente", "id_lista": lista.id_lista}, 200
+            return {"mensaje": "Lista desaprobada exitosamente", "id_lista": lista.id_lista}, 200
         except Exception as e:
             db.session.rollback()
             logger.error(f'Error al aprobar la lista: {str(e)}')
-            return {"mensaje": "Error al aprobar la lista", "error": str(e)}, 500
+            return {"mensaje": "Error al desaprobar la lista", "error": str(e)}, 500
 
     def get_lista_by_id(self, id_lista):
         try:
@@ -391,3 +369,30 @@ class ListaServicioImpl(IListaServicio):
             }
             resultado.append(lista_info)
         return resultado
+    
+    def insert_lista_candidato(lista):
+        try:
+            db.session.add(lista)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            print(f"Error en la inserción de la lista: {e}")
+            raise e
+
+    def insert_candidato(candidato):
+        try:
+            db.session.add(candidato)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            print(f"Error en la inserción del candidato: {e}")
+            raise e
+
+    def insert_propuesta(propuesta):
+        try:
+            db.session.add(propuesta)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            print(f"Error en la inserción de la propuesta: {e}")
+            raise e     

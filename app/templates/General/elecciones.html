@@ -3,7 +3,7 @@
 {% block title %}Admin Page{% endblock %}
 
 {% block dashboard_content %}
-<!-- Pestanias -->
+
 <div class="container">
     <h1 class="mb-4">Candidatos</h1>
     <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -18,7 +18,6 @@
         </li>
     </ul>
     
-    <!-- Contenido de las Pestañas -->
     <div class="tab-content" id="myTabContent">
         <div class="tab-pane fade show active" id="eleccionfin" role="tabpanel" aria-labelledby="eleccionfin">
             <table class="table table-bordered mt-3">
@@ -47,7 +46,6 @@
             </table>
         </div>
     
-        <!-- Pestaña de Solo Propuestas -->
         <div class="tab-pane fade" id="eleccioncurso" role="tabpanel" aria-labelledby="eleccioncurso">
             <table class="table table-bordered mt-3">
                 <thead>
@@ -66,7 +64,7 @@
                             <td>{{ eleccioncurso.id_eleccion }}</td>
                             <td>{{ eleccioncurso.descripcion }}</td>
                             <td>{{ eleccioncurso.fecha }}</td>
-                            <td>{{ eleccioncurso.hora_inicio }} - {{ eleccioncurso.hora_final }}</td>
+                            <td>{{ eleccioncurso.hora_inicio }} - {{ eleccioncurso.hora_fin }}</td>
                             <td>{{ eleccioncurso.estado }}</td>
                             <td><a href="{{ url_for('home_bp.ver_lista_candidatos', id=eleccioncurso.id_eleccion) }}">Ver</a></td>
                         </tr>
@@ -94,7 +92,7 @@
                             <td>{{ eleccionpro.id_eleccion }}</td>
                             <td>{{ eleccionpro.descripcion }}</td>
                             <td>{{ eleccionpro.fecha }}</td>
-                            <td>{{ eleccionpro.hora_inicio }} - {{ eleccionpro.hora_final }}</td>
+                            <td>{{ eleccionpro.hora_inicio }} - {{ eleccionpro.hora_fin }}</td>
                             <td>{{ eleccionpro.estado }}</td>
                             <td><a href="{{ url_for('home_bp.ver_lista_candidatos', id=eleccionpro.id_eleccion) }}">Ver</a></td>
                         </tr>

@@ -21,22 +21,22 @@ function cambiarEstadoLista(id_lista, accion) {
         },
     })
     .then(response => {
-        console.log('HTTP status:', response.status); // Debug: Imprimir el estado HTTP
+        console.log('HTTP status:', response.status); 
         if (!response.ok) {
             return response.text().then(text => { throw new Error(text); });
         }
         return response.json().catch(error => {
-            console.error('Error parsing JSON:', error); // Debug: Imprimir error de JSON
+            console.error('Error parsing JSON:', error); 
             throw new Error('La respuesta no es un JSON válido');
         });
     })
     .then(data => {
-        console.log('Datos recibidos:', data); // Debug: Imprimir datos recibidos
+        console.log('Datos recibidos:', data); 
         alert(mensajeExito);
         location.reload();
     })
     .catch(error => {
-        console.error('Error capturado:', error); // Debug: Imprimir errores
+        console.error('Error capturado:', error); 
         alert('Error al cambiar el estado de la lista');
     });
 }
