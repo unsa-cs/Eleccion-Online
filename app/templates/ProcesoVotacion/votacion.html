@@ -68,7 +68,8 @@
                 </div>
             </div>
             {% endfor %}
-            <button type="submit" class="btn btn-primary">Votar</button>
+            <button type="submit" class="btn btn-primary emitir-voto">Votar</button>
+            <a class="btn btn-primary emitir-voto" href="{{ url_for('home_bp.seleccionar_eleccion_votacion') }}" >Regresar</a>
         </form>
     </div>
 

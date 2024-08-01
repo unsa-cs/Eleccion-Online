@@ -9,7 +9,6 @@
     <meta http-equiv="Expires" content="0" />
     <title>{% block title %}Página de Inicio{% endblock %}</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     {% block head %}{% endblock %}
 
@@ -35,7 +34,10 @@
                     <a class="nav-link" href="{{ url_for('home_bp.login') }}">Inicio Sesión</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('home_bp.listas_candidatos_elector') }}">Listas Candidatos</a>
+                    <a class="nav-link" href="{{ url_for('home_bp.listar_elecciones') }}">Listas Candidatos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('home_bp.inscripcion_cand') }}">Inscripcion Candidatos</a>
                 </li>
             </ul>
         </div>
@@ -48,7 +50,7 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    {% block custom_scripts %}      
+    {% block custom_scripts %}
     {% endblock %}
 </body>
 

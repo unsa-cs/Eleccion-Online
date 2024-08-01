@@ -1,25 +1,23 @@
-import logging
-from datetime import datetime
-
+from app import db
 from flask import jsonify
 from sqlalchemy import func
 from sqlalchemy.orm import aliased
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError
 
-from app import db
 from app.models.Eleccion import Eleccion
 from app.models.Eleccion import EleccionSchema
 from app.models.Candidato import Candidato
 from app.models.Candidato import CandidatoSchema
-from app.models.ListaCandidato import EstadoListaEnum, ListaCandidato, ListaCandidatoSchema
+from app.models.ListaCandidato import ListaCandidato
 from app.models.Elector import Elector
 from app.models.Voto import Voto
-from app.models.Propuesta import PropuestaSchema, Propuesta
+from app.models.Propuesta import Propuesta
+from app.models.Propuesta import PropuestaSchema
 from app.services.IEleccionServicio import IEleccionServicio
 from app.services.IEleccionServicio import IListaServicio
 from app.services.IEleccionServicio import ICandidatoServicio
 from app.services.IEleccionServicio import IVotoServicio
-
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +87,8 @@ class EleccionServicioImpl(IEleccionServicio):
             ).filter(
                 ListaCandidato.id_eleccion == id_eleccion
             ).all()
-            result = [{"Candidato": '%s %s %s' % (tupla[0], tupla[1], tupla[2]), "Lista": tupla[3], "id_candidato": tupla[4]} for tupla in all_candidatos]
+            result = [{"Candidato": '%s %s %s' % (tupla[0], tupla[1], tupla[2]), "Lista": tupla[3],\
+                        "id_candidato": tupla[4]} for tupla in all_candidatos]
             return result
         except Exception as e:
             logger.error(f'Error al obtener los candidatos por elección: {str(e)}')
@@ -111,6 +110,7 @@ class EleccionServicioImpl(IEleccionServicio):
             db.session.rollback()
             logger.error(f'Error al insertar la elección: {str(e)}')
             raise e
+
     def get_elector_by_email(self, email):
         try:
             elector = Elector.query.filter_by(correo=email).first()
@@ -118,30 +118,31 @@ class EleccionServicioImpl(IEleccionServicio):
         except Exception as e:
             logger.error(f'Error al obtener el elector por email: {str(e)}')
             raise e
+
     def get_elecciones_hechas_por_elector(self, id_elector):
         try:
-            elecciones = db.session.query(ListaCandidato.id_eleccion).join(Voto, ListaCandidato.id_lista == Voto.id_lista).filter(Voto.id_elector == id_elector).all()
+            elecciones = db.session.query(ListaCandidato.id_eleccion).join(Voto, ListaCandidato.id_lista == Voto.id_lista)\
+                .filter(Voto.id_elector == id_elector).all()
             result = [tupla[0] for tupla in elecciones]
             return result
         except Exception as e:
             logger.error(f'Error al obtener las elecciones hechas por el elector: {str(e)}')
             raise e
-        
-    def get_elecciones_hechas_por_elector(self, id_elector):
+    def get_all_elecciones(self):
         try:
-            elecciones = db.session.query(ListaCandidato.id_eleccion).join(Voto, ListaCandidato.id_lista == Voto.id_lista).filter(Voto.id_elector == id_elector).all()
-            result = [tupla[0] for tupla in elecciones]
+            all_eleccion = Eleccion.query.all()
+            result = eleccion_schemas.dump(all_eleccion)
             return result
         except Exception as e:
-            logger.error(f'Error al obtener las elecciones hechas por el elector: {str(e)}')
+            logger.error(f'Error al obtener todas las elecciones: {str(e)}')
             raise e
 
-        
 class VotoServicioImpl(IVotoServicio):
         
     def get_voto_by_elector(self, id_elector):
         try:
-            voto = db.session.query(Elector.nombres).join(Voto, Elector.id == Voto.id_elector).filter(Elector.id == id_elector).all()
+            voto = db.session.query(Elector.nombres).join(Voto, Elector.id == Voto.id_elector)\
+                .filter(Elector.id == id_elector).all()
             result = [{"nombre": tupla[0]} for tupla in voto]
             return result
         except Exception as e:
@@ -177,6 +178,21 @@ class VotoServicioImpl(IVotoServicio):
             for tupla in votos
         ]
         return result
+    
+    def get_cant_votos_by_eleccion(self, id_eleccion):
+        try:
+            cant_votos = db.session.query(ListaCandidato.nombre, func.count(Voto.id_voto)) \
+                .join(Voto, ListaCandidato.id_lista == Voto.id_lista) \
+                .filter(ListaCandidato.id_eleccion == id_eleccion) \
+                .group_by(ListaCandidato.nombre) \
+                .all()
+            
+            result = [{"nombre_lista": tupla[0], "cant_votos": tupla[1]} for tupla in cant_votos]
+            return result
+        except Exception as e:
+            logger.error(f'Error al obtener la cantidad de votos por lista: {str(e)}')
+            raise e
+
 
 class CandidatoServicioImpl(ICandidatoServicio):
     
@@ -208,7 +224,6 @@ class CandidatoServicioImpl(ICandidatoServicio):
 
         return result
 
-
 class ListaServicioImpl(IListaServicio):
     def obtener_listas(self):
         listas = ListaCandidato.query.all()
@@ -228,7 +243,7 @@ class ListaServicioImpl(IListaServicio):
         
         return resultado
 
-    def get_lista_by_eleccion(self, id_eleccion):
+    def get_lista_aprobada_by_eleccion(self, id_eleccion):
         try:
             all_listas = db.session.query(
                 ListaCandidato.nombre, 
@@ -236,10 +251,47 @@ class ListaServicioImpl(IListaServicio):
             ).filter(
                 ListaCandidato.id_eleccion == id_eleccion
             ).all()
+            ).filter(ListaCandidato.estado == "aprobado").all()
             result = [{"nombre": tupla[0], "id_lista": tupla[1]} for tupla in all_listas]
+            print(result)
             return result
         except Exception as e:
             logger.error(f'Error al obtener las listas por elección: {str(e)}')
+            raise e
+
+    def insert_lista_candidato(self, lista):
+        try:
+            db.session.add(lista)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            print(f"Error en la inserción de la lista: {e}")
+            raise e
+
+    def insert_candidato(self,candidato):
+        try:
+            db.session.add(candidato)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            print(f"Error en la inserción del candidato: {e}")
+            raise e
+
+    def insert_propuesta(self, propuesta):
+        try:
+            db.session.add(propuesta)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            print(f"Error en la inserción de la propuesta: {e}")
+            raise e
+    def get_all_eleccion_abiertas(self):
+        try:
+            all_eleccion = Eleccion.query.filter(Eleccion.estado == "abierto").all()
+            result = eleccion_schemas.dump(all_eleccion)
+            return result
+        except Exception as e:
+            logger.error(f'Error al obtener todas las elecciones abiertas: {str(e)}')
             raise e
         
     def get_lista_por_eleccion(self, id_eleccion):
@@ -291,6 +343,8 @@ class ListaServicioImpl(IListaServicio):
             lista = ListaCandidato.query.filter_by(id_lista=id_lista).first()
             if lista:
                 lista.estado = EstadoListaEnum.aprobado.value
+                for propuesta in lista.propuestas:
+                    propuesta.denegada = True
                 db.session.commit()
                 return {"mensaje": "Lista aprobada exitosamente", "id_lista": lista.id_lista}
             else:
@@ -304,12 +358,14 @@ class ListaServicioImpl(IListaServicio):
             lista = ListaCandidato.query.filter_by(id_lista=id_lista).first()
             if lista:
                 lista.estado = EstadoListaEnum.desaprobado.value
-                db.session.commit()
-                return {"mensaje": "Lista desaprobada exitosamente", "id_lista": lista.id_lista}
-            else:
-                return {"mensaje": "Lista no encontrada", "id_lista": id_lista}
+            Propuesta.query.filter_by(id_lista=id_lista).update({"denegada": True})
+            Candidato.query.filter_by(id_lista=id_lista).update({"denegado": True})
+            db.session.commit()
+            return {"mensaje": "Lista aprobada exitosamente", "id_lista": lista.id_lista}, 200
         except Exception as e:
-            logger.error(f'Error al desaprobar la lista: {str(e)}')
+            db.session.rollback()
+            logger.error(f'Error al aprobar la lista: {str(e)}')
+            return {"mensaje": "Error al aprobar la lista", "error": str(e)}, 500
 
     def get_lista_by_id(self, id_lista):
         try:
@@ -329,11 +385,10 @@ class ListaServicioImpl(IListaServicio):
                 'id_lista': lista.id_lista,
                 'nombre': lista.nombre,
                 'propuestas': [{'descripcion': propuesta.descripcion} for propuesta in lista.propuestas],
-                'candidatos': [{'nombre': f"{candidato.nombres} {candidato.apellido_paterno} {candidato.apellido_materno}"} for candidato in lista.candidatos]
+                'candidatos': [{'nombre': f"{candidato.nombres} {candidato.apellido_paterno} {candidato.apellido_materno}"}\
+                                for candidato in lista.candidatos]
             }
-
             resultado.append(lista_info)
-
         return resultado
     
     def insert_lista_candidato(lista):

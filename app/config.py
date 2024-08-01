@@ -1,6 +1,5 @@
-import os
-
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
 
@@ -11,5 +10,6 @@ DB_NAME = os.getenv('DB_NAME')
 SECRET_KEY = os.getenv('SECRET_KEY_S')
 class Config:
     SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
+    SECRET_KEY = SECRET_KEY
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SECRET_KEY = os.environ.get('SECRET_KEY_S', 'default_secret_key')
+
