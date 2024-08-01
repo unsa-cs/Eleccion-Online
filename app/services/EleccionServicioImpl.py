@@ -224,7 +224,7 @@ class ListaServicioImpl(IListaServicio):
             lista_info = {
                 'id_lista': lista.id_lista,
                 'nombre': lista.nombre,
-                'estado': lista.estado.value,
+                'estado': lista.estado,
                 'id_eleccion': lista.id_eleccion,
                 'propuestas': [{'descripcion': propuesta.descripcion} for propuesta in lista.propuestas],
                 'candidatos': [{'nombre': f"{candidato.nombres} {candidato.apellido_paterno} {candidato.apellido_materno}"} for candidato in lista.candidatos]
