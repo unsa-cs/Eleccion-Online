@@ -53,7 +53,6 @@ def admin_required(f):
     return decorated_function_admin
 
 @home_bp.route('/Admins')
-@admin_required
 def home():
     return render_template('Admin/home.html')
 
@@ -142,7 +141,7 @@ def insert_eleccion():
     descripcion = request.form['descripcion']
     eleccion = Eleccion(fecha, hora_inicio, hora_fin, estado, descripcion)
     eleccion_servicio.insert_eleccion(eleccion)
-    return url_for('home_bp.listar_elecciones')
+    return url_for('home_bp.home')
 
 @home_bp.route('/Votos')
 def ver_votos():
@@ -158,7 +157,7 @@ def ver_votos():
 @login_required
 def seleccionar_eleccion_votacion():
     elector = elector_service.get_elector_by_email(session['correo'])
-    elecciones = eleccion_servicio.get_all_eleccion(2)
+    elecciones = eleccion_servicio.get_elecciones_en_curso()
     elecciones_hechas = eleccion_servicio.get_elecciones_hechas_por_elector(elector.id)
     elecciones_restantes = len(elecciones) - len(elecciones_hechas)
     return render_template('ProcesoVotacion/lista_eleccion_votacion.html', \
@@ -236,11 +235,10 @@ def login():
             if elector is None:
                 mensaje = 'Correo o contraseña incorrectos'
                 return render_template(LOGIN_HTML, mensaje=mensaje)
-            voto = voto_servicio.get_voto_by_elector(elector.id)
             if elector and elector.revisar_contrasena(contrasena):
                 session['correo'] = elector.correo
                 logger.info(f'El elector {elector.nombres} ha iniciado sesión')
-                return render_template('dashboard.html', elector=elector, voto=voto)
+                return render_template('dashboard.html', elector=elector)
             else:
                 mensaje = 'Correo o contraseña incorrectos'
                 return render_template(LOGIN_HTML, mensaje=mensaje)
@@ -255,8 +253,7 @@ def login():
 def dashboard():
     if 'correo' in session:
         elector = elector_service.get_elector_by_email(session['correo'])
-        voto = voto_servicio.get_voto_by_elector(elector.id)
-        response = make_response(render_template('dashboard.html', elector=elector, voto=voto))
+        response = make_response(render_template('dashboard.html', elector=elector))
         response.headers['Cache-Control'] = 'no-store'
         response.headers['Pragma'] = 'no-cache'
         return response

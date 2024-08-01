@@ -4,7 +4,7 @@
 
 {% block content %}
     <h1>Ingrese los siguientes datos:</h1>
-    <form action="/InsertEleccion" method="POST">
+    <form action="{{ url_for('home_bp.home') }} method="POST">
         <label for="fecha">Fecha:</label>
         <input type="date" id="fecha" name="fecha" required><br><br>
     
