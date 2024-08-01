@@ -11,6 +11,7 @@ from app.models.Elector import Elector
 from app.models.Eleccion import Eleccion
 from app.models.ListaCandidato import ListaCandidato
 from app.models.Candidato import Candidato
+from app.models.Propuesta import Propuesta
 
 from functools import wraps
 import logging
@@ -201,35 +202,60 @@ def mostrar_candidatos():
         candidatos_inscritos=candidatos_inscritos
     )
 
-@home_bp.route('/inscripcion', methods=['GET', 'POST'])
+@home_bp.route('/Inscripcion_cand', methods=['GET'])
+def inscripcion_cand():
+    elecciones=lista_servicio.get_all_eleccion_abiertas()
+    return render_template('inscripcion.html', elecciones=elecciones)
+
+
+
+@home_bp.route('/register_candidates', methods=['POST'])
 def listas():
-    if request.method == 'POST':
-        try:
-            for i in range(3):
-                nombre = request.form[f'nombre{i}']
-                estado = request.form[f'estado{i}']
-                id_eleccion = request.form[f'eleccion{i}']
+    try:
+        nombre_partido = request.form.get('nombre_partido')
+        campana = request.form.get('campana')
+        
+        lista_candidato = ListaCandidato(nombre=nombre_partido,id_eleccion=campana)
+        lista_servicio.insert_lista_candidato(lista_candidato)
 
-                if not nombre or not estado or not id_eleccion:
-                    raise ValueError("Todos los campos deben ser llenados.")
+        id_lista = lista_candidato.id_lista
 
-                nuevo_candidato = crear_candidato(nombre, estado, id_eleccion)
-                guardar_en_bd(nuevo_candidato)
-            return redirect(url_for('success_page'))
-        except ValueError as e:
-            flash(f"Error en los datos del formulario: {e}", "error")
-        except Exception as e:
-            db.session.rollback()
-            flash(f"Se produjo un error al guardar los datos: {e}", "error")
-        finally:
-            db.session.remove()
+        listpropuestas = []
+        propuestas = request.form.getlist('propuestas[]')
+        for propuesta in propuestas:
+            if propuesta: 
+                nueva_propuesta = Propuesta(
+                    descripcion=propuesta,
+                    id_lista=id_lista
+                )
+                listpropuestas.append(nueva_propuesta)
+                lista_servicio.insert_propuesta(nueva_propuesta)
+        
+        listcandidatos = []
+
+
+        for i in range(4):
+            nombre = request.form.get(f'nombre{i}')
+            apellido_paterno = request.form.get(f'apellido_paterno{i}')
+            apellido_materno = request.form.get(f'apellido_materno{i}')
+            dni = request.form.get(f'dni{i}')
+            
+            rol_ = "asesor" if i != 0 else "presidente"
+            candidato = Candidato(
+                dni=dni,
+                nombres=nombre,
+                apellido_paterno=apellido_paterno,
+                apellido_materno=apellido_materno,
+                rol=rol_,
+                id_lista=id_lista
+
+            )
+            lista_servicio.insert_candidato(candidato)
+            listcandidatos.append(candidato)
+
+
+        flash('Candidatos y propuestas registrados con éxito', 'success')
+    except Exception as e:
+        flash(f'Error al registrar candidatos y propuestas: {str(e)}', 'danger')
+    
     return render_template('inscripcion.html')
-
-def crear_candidato(nombre, estado, id_eleccion):
-    nuevo_candidato = Candidato(nombre=nombre, estado=estado, id_eleccion=id_eleccion)
-    return nuevo_candidato
-
-def guardar_en_bd(candidato):
-    db.session.add(candidato)
-    db.session.commit()
-

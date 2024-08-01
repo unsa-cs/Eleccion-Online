@@ -2,6 +2,7 @@ from app import db
 from flask import jsonify
 from sqlalchemy import func
 from sqlalchemy.orm import aliased
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.models.Eleccion import Eleccion
 from app.models.Eleccion import EleccionSchema
@@ -177,4 +178,39 @@ class ListaServicioImpl(IListaServicio):
             return result
         except Exception as e:
             logger.error(f'Error al obtener las listas por elección: {str(e)}')
+            raise e
+
+    def insert_lista_candidato(self, lista):
+        try:
+            db.session.add(lista)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            print(f"Error en la inserción de la lista: {e}")
+            raise e
+
+    def insert_candidato(self,candidato):
+        try:
+            db.session.add(candidato)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            print(f"Error en la inserción del candidato: {e}")
+            raise e
+
+    def insert_propuesta(self, propuesta):
+        try:
+            db.session.add(propuesta)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            print(f"Error en la inserción de la propuesta: {e}")
+            raise e
+    def get_all_eleccion_abiertas(self):
+        try:
+            all_eleccion = Eleccion.query.filter(Eleccion.estado == "abierto").all()
+            result = eleccion_schemas.dump(all_eleccion)
+            return result
+        except Exception as e:
+            logger.error(f'Error al obtener todas las elecciones abiertas: {str(e)}')
             raise e
