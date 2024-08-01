@@ -20,7 +20,7 @@ import os
 
 load_dotenv()
 
-from werkzeug.security import check_password_hash
+import bcrypt
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -38,11 +38,13 @@ voto_servicio = VotoServicioImpl()
 
 def admin_required(f):
     @wraps(f)
-    def decorated_function(*args, **kwargs):
+    def decorated_function_admin(*args, **kwargs):
+        logger.info(f"Verificando acceso: sesión actual {session}")
         if not session.get('admin'):
-            return render_template('index.html')
+            logger.info(f"Usuario no autorizado, sesión: {session}")
+            return render_template("login.html")  # Redirige a la ruta 'index' o la ruta de inicio
         return f(*args, **kwargs)
-    return decorated_function
+    return decorated_function_admin
 
 @home_bp.route('/Admins')
 @admin_required
@@ -189,11 +191,14 @@ def login():
             contrasena = data.get('contrasena')
             admin_email = os.getenv('ADMIN_EMAIL')
             admin_password = os.getenv('ADMIN_PASSWORD')
-            if correo == admin_email and contrasena == check_password_hash(admin_password, contrasena):
+            if correo == admin_email and bcrypt.checkpw(contrasena.encode('utf-8'), admin_password.encode('utf-8')):
                 session['correo'] = admin_email
                 session['admin'] = True
                 return render_template('Admin/home.html')
             elector = Elector.query.filter_by(correo=correo).first()
+            if elector is None:
+                mensaje = 'Correo o contraseña incorrectos'
+                return render_template(LOGIN_HTML, mensaje=mensaje)
             voto = voto_servicio.get_voto_by_elector(elector.id)
             if elector and elector.revisar_contrasena(contrasena):
                 session['correo'] = elector.correo
