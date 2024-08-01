@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Página de Inicio{% endblock %}
+{% block title %}Admin Page{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -10,6 +10,7 @@
             <a href="{{ url_for('home_bp.listar_elecciones') }}" class="list-group-item list-group-item-action">Ver Elecciones</a>
             <a href="{{ url_for('home_bp.ver_candidatos') }}" class="list-group-item list-group-item-action">Ver Candidatos</a>
             <a href="{{ url_for('home_bp.ver_votos') }}" class="list-group-item list-group-item-action">Ver Votos</a>
+            <a href="{{ url_for('home_bp.mostrar_elecciones') }}" class="list-group-item list-group-item-action">Mostrar Elecciones</a>
 
         </div>
     </div>

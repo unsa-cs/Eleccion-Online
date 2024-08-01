@@ -10,10 +10,11 @@ class Voto(db.Model):
     def __init__(self, id_elector, id_lista):
         self.id_elector = id_elector
         self.id_lista = id_lista
+
 class VotoSchema(ma.Schema):
     class Meta:
         fields = (
             'id_voto',
             'id_elector',
-            'id_lista_candidato'
+            'id_lista'
         )
