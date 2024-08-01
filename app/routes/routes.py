@@ -38,27 +38,23 @@ def listar_candidatos():
     listas_json = lista_servicio.obtener_listas()
     return render_template('ListaCandidato/lista_candidatos.html', listas=listas_json)
 
-@home_bp.route('/aprobar_lista/<int:id_lista>', methods=['POST'])
-#@login_required
+@home_bp.route('/aprobar_lista/<int:id_lista>', methods=['PUT'])
 def aprobar_lista(id_lista):
     try:
         lista_servicio.aprobar_lista(id_lista)
-        flash('Lista aprobada exitosamente', 'success')
+        return jsonify({'message': 'Lista aprobada exitosamente'}), 200
     except Exception as e:
         logger.error(f'Error al aprobar la lista: {str(e)}')
-        flash('Error al aprobar la lista', 'danger')
-    return redirect(url_for('home_bp.listar_candidatos'))
+        return jsonify({'message': 'Error al aprobar la lista', 'error': str(e)}), 500
 
-@home_bp.route('/desaprobar_lista/<int:id_lista>', methods=['POST'])
-#@login_required
+@home_bp.route('/desaprobar_lista/<int:id_lista>', methods=['PUT'])
 def desaprobar_lista(id_lista):
     try:
         lista_servicio.desaprobar_lista(id_lista)
-        flash('Lista desaprobada exitosamente', 'success')
+        return jsonify({'message': 'Lista desaprobada exitosamente'}), 200
     except Exception as e:
         logger.error(f'Error al desaprobar la lista: {str(e)}')
-        flash('Error al desaprobar la lista', 'danger')
-    return redirect(url_for('home_bp.listar_candidatos'))
+        return jsonify({'message': 'Error al desaprobar la lista', 'error': str(e)}), 500
 
 def login_required(f):
     @wraps(f)
