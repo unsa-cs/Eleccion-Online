@@ -1,41 +1,79 @@
-from app import db
+import logging
+from datetime import datetime
+
 from flask import jsonify
 from sqlalchemy import func
 from sqlalchemy.orm import aliased
 
+from app import db
 from app.models.Eleccion import Eleccion
 from app.models.Eleccion import EleccionSchema
 from app.models.Candidato import Candidato
 from app.models.Candidato import CandidatoSchema
-from app.models.ListaCandidato import ListaCandidato
-from app.models.ListaCandidato import EstadoListaEnum
+from app.models.ListaCandidato import EstadoListaEnum, ListaCandidato, ListaCandidatoSchema
 from app.models.Elector import Elector
 from app.models.Voto import Voto
-from app.models.Propuesta import Propuesta
-from app.models.Propuesta import PropuestaSchema
+from app.models.Propuesta import PropuestaSchema, Propuesta
 from app.services.IEleccionServicio import IEleccionServicio
 from app.services.IEleccionServicio import IListaServicio
 from app.services.IEleccionServicio import ICandidatoServicio
 from app.services.IEleccionServicio import IVotoServicio
 
 
-import logging
 logger = logging.getLogger(__name__)
 
 eleccion_schema = EleccionSchema()
 eleccion_schemas = EleccionSchema(many = True)
 candidato_schema = CandidatoSchema()
 propuesta_schema = PropuestaSchema()
+lista_candidato_schema = ListaCandidatoSchema()
 
 class EleccionServicioImpl(IEleccionServicio):
-    def get_all_eleccion(self):
-        try:
-            all_eleccion = Eleccion.query.all()
-            result = eleccion_schemas.dump(all_eleccion)
-            return result
-        except Exception as e:
-            logger.error(f'Error al obtener todas las elecciones: {str(e)}')
-            raise e
+    try:
+        def get_all_eleccion(self, modo):
+            if modo == 1:
+                ahora = datetime.now()
+
+                all_eleccion = Eleccion.query.filter(
+                    (Eleccion.fecha < ahora.date()) |
+                    ((Eleccion.fecha == ahora.date()) & (Eleccion.hora_fin < ahora.time()))
+                ).all()
+
+                result = eleccion_schemas.dump(all_eleccion)
+                
+                return result
+            elif modo == 2:
+                ahora = datetime.now()
+
+                all_eleccion = Eleccion.query.filter(
+                    ((Eleccion.fecha == ahora.date()) & (Eleccion.hora_inicio < ahora.time()) & (Eleccion.hora_fin > ahora.time()))
+                ).all()
+
+                result = eleccion_schemas.dump(all_eleccion)
+                return result
+            elif modo == 3:
+                ahora = datetime.now()
+
+                all_eleccion = Eleccion.query.filter(
+                    (Eleccion.fecha > ahora.date()) |
+                    ((Eleccion.fecha == ahora.date()) & (Eleccion.hora_inicio > ahora.time()))
+                ).all()
+
+                result = eleccion_schemas.dump(all_eleccion)
+                print(result[0]['hora_inicio'])
+                print(ahora.time())
+                
+                return result
+            elif modo == 4:
+                
+                    all_eleccion = Eleccion.query.all()
+                    result = eleccion_schemas.dump(all_eleccion)
+                    print(result)
+                    return result
+    except Exception as e:
+        logger.error(f'Error al obtener todas las elecciones: {str(e)}')
+        raise e
+        
     def get_candidatos_by_eleccion(self, id_eleccion):
         try:
             all_candidatos = db.session.query(
@@ -78,6 +116,15 @@ class EleccionServicioImpl(IEleccionServicio):
         except Exception as e:
             logger.error(f'Error al obtener el elector por email: {str(e)}')
             raise e
+    def get_elecciones_hechas_por_elector(self, id_elector):
+        try:
+            elecciones = db.session.query(ListaCandidato.id_eleccion).join(Voto, ListaCandidato.id_lista == Voto.id_lista).filter(Voto.id_elector == id_elector).all()
+            result = [tupla[0] for tupla in elecciones]
+            return result
+        except Exception as e:
+            logger.error(f'Error al obtener las elecciones hechas por el elector: {str(e)}')
+            raise e
+        
     def get_elecciones_hechas_por_elector(self, id_elector):
         try:
             elecciones = db.session.query(ListaCandidato.id_eleccion).join(Voto, ListaCandidato.id_lista == Voto.id_lista).filter(Voto.id_elector == id_elector).all()
@@ -141,11 +188,24 @@ class CandidatoServicioImpl(ICandidatoServicio):
     def transformar_candidatos(self, candidatos):
         return [candidato_schema.dump(candidato) for candidato in candidatos]
 
+    def obtener_candidatos_filtrados(self, estado):
+        return Candidato.query.filter(Candidato.denegado == estado).all()
+    
     def get_candidatos_denegados(self):
         return self.get_candidatos(True)
 
     def get_candidatos_inscritos(self):
-        return self.get_candidatos(False)
+        candidatos = Candidato.query \
+            .filter(Candidato.denegado == False) \
+            .all()
+
+        result = []
+        for candidato in candidatos:
+            candidato_data = candidato_schema.dump(candidato)
+            result.append(candidato_data)
+
+        return result
+
 
 class ListaServicioImpl(IListaServicio):
     def obtener_listas(self):
@@ -179,7 +239,51 @@ class ListaServicioImpl(IListaServicio):
         except Exception as e:
             logger.error(f'Error al obtener las listas por elección: {str(e)}')
             raise e
+        
+    def get_lista_por_eleccion(self, id_eleccion):
+        try:                
+            listas = ListaCandidato.query.filter(
+                ListaCandidato.id_eleccion == id_eleccion
+            ).all()
 
+            result = []
+            print(listas)
+            for lista in listas:
+                propuestas = Propuesta.query.filter(
+                    Propuesta.id_lista == lista.id_lista
+                ).all()
+                
+                candidatos = Candidato.query.filter(
+                    Candidato.id_lista == lista.id_lista
+                ).all()
+
+                lista_data = {
+                    'id_lista': lista.id_lista,
+                    'nombre': lista.nombre,
+                    'estado': lista.estado,
+                    'propuestas': [
+                        {
+                            'descripcion': propuesta.descripcion
+                        }
+                        for propuesta in propuestas
+                    ],
+                    'candidatos': [
+                        {
+                            'nombres': candidato.nombres,
+                            'apellido_paterno': candidato.apellido_paterno,
+                            'apellido_materno': candidato.apellido_materno,
+                            'rol': candidato.rol
+                        }
+                        for candidato in candidatos
+                    ]
+                }
+                result.append(lista_data)
+            #print(result)
+            return result
+        except Exception as e:
+            logger.error(f'Error al obtener las listas por elección: {str(e)}')
+            raise e
+        
     def aprobar_lista(self, id_lista):
         try:
             lista = ListaCandidato.query.filter_by(id_lista=id_lista).first()
@@ -204,7 +308,7 @@ class ListaServicioImpl(IListaServicio):
                 return {"mensaje": "Lista no encontrada", "id_lista": id_lista}
         except Exception as e:
             logger.error(f'Error al desaprobar la lista: {str(e)}')
-        
+
     def get_lista_by_id(self, id_lista):
         try:
             listas = ListaCandidato.query.get(id_lista)
@@ -212,12 +316,12 @@ class ListaServicioImpl(IListaServicio):
         except Exception as e:
             logger.error(f'Error al obtener la lista por id: {str(e)}')
             raise e
-    
+
     def obtener_listas_aprobadas(self):
         listas_aprobadas = ListaCandidato.query.filter_by(estado='aprobado').all()
-    
+
         resultado = []
-        
+
         for lista in listas_aprobadas:
             lista_info = {
                 'id_lista': lista.id_lista,
@@ -225,7 +329,7 @@ class ListaServicioImpl(IListaServicio):
                 'propuestas': [{'descripcion': propuesta.descripcion} for propuesta in lista.propuestas],
                 'candidatos': [{'nombre': f"{candidato.nombres} {candidato.apellido_paterno} {candidato.apellido_materno}"} for candidato in lista.candidatos]
             }
-            
+
             resultado.append(lista_info)
-        
+
         return resultado
