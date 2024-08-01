@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import logging
 from app import db
 from flask import jsonify
