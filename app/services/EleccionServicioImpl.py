@@ -307,6 +307,8 @@ class ListaServicioImpl(IListaServicio):
             lista = ListaCandidato.query.filter_by(id_lista=id_lista).first()
             if lista:
                 lista.estado = EstadoListaEnum.aprobado.value
+                for propuesta in lista.propuestas:
+                    propuesta.denegada = True
                 db.session.commit()
                 return {"mensaje": "Lista aprobada exitosamente", "id_lista": lista.id_lista}
             else:
@@ -320,12 +322,14 @@ class ListaServicioImpl(IListaServicio):
             lista = ListaCandidato.query.filter_by(id_lista=id_lista).first()
             if lista:
                 lista.estado = EstadoListaEnum.desaprobado.value
-                db.session.commit()
-                return {"mensaje": "Lista desaprobada exitosamente", "id_lista": lista.id_lista}
-            else:
-                return {"mensaje": "Lista no encontrada", "id_lista": id_lista}
+            Propuesta.query.filter_by(id_lista=id_lista).update({"denegada": True})
+            Candidato.query.filter_by(id_lista=id_lista).update({"denegado": True})
+            db.session.commit()
+            return {"mensaje": "Lista aprobada exitosamente", "id_lista": lista.id_lista}, 200
         except Exception as e:
-            logger.error(f'Error al desaprobar la lista: {str(e)}')
+            db.session.rollback()
+            logger.error(f'Error al aprobar la lista: {str(e)}')
+            return {"mensaje": "Error al aprobar la lista", "error": str(e)}, 500
 
     def get_lista_by_id(self, id_lista):
         try:

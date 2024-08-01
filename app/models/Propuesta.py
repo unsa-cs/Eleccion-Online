@@ -5,11 +5,13 @@ class Propuesta(db.Model):
     __tablename__ = 'propuesta'
     id_propuesta = db.Column(db.Integer, primary_key=True, autoincrement=True)
     descripcion = db.Column(db.String(255), nullable=True)
-    id_lista = db.Column(db.Integer, db.ForeignKey('lista_candidato.id_lista'), nullable=True)
-    
-    def __init__(self, descripcion, id_lista):
+    denegada = db.Column(db.Boolean, nullable=True, default=False)
+    id_lista = db.Column(db.Integer, db.ForeignKey('listacandidato.id_lista'), nullable=True)
+
+    def __init__(self, descripcion, id_lista, denegada=False):
         self.descripcion = descripcion
         self.id_lista = id_lista
+        self.denegada = denegada
 
 
 class PropuestaSchema(ma.Schema):
@@ -17,6 +19,7 @@ class PropuestaSchema(ma.Schema):
         fields = (
             'id_propuesta',
             'descripcion',
+            'denegada',
             'id_lista_candidato'
         )
 

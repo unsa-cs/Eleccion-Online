@@ -1,15 +1,13 @@
 function cambiarEstadoLista(id_lista, accion) {
     let url = '';
-    let metodo = '';
+    let metodo = 'PUT';
     let mensajeExito = '';
 
     if (accion === 'aprobar') {
-        url = `/listas/${id_lista}/aprobar`;
-        metodo = 'PUT';  
+        url = `/aprobar_lista/${id_lista}`;
         mensajeExito = 'Lista aprobada correctamente';
     } else if (accion === 'desaprobar') {
-        url = `/listas/${id_lista}/desaprobar`;
-        metodo = 'PUT'; 
+        url = `/desaprobar_lista/${id_lista}`;
         mensajeExito = 'Lista desaprobada correctamente';
     } else {
         alert('Acción no válida');
@@ -23,18 +21,22 @@ function cambiarEstadoLista(id_lista, accion) {
         },
     })
     .then(response => {
-        if (response.ok) {
-            return response.json();
-        } else {
-            return response.text().then(text => {throw new Error(text)});
+        console.log('HTTP status:', response.status); // Debug: Imprimir el estado HTTP
+        if (!response.ok) {
+            return response.text().then(text => { throw new Error(text); });
         }
+        return response.json().catch(error => {
+            console.error('Error parsing JSON:', error); // Debug: Imprimir error de JSON
+            throw new Error('La respuesta no es un JSON válido');
+        });
     })
     .then(data => {
+        console.log('Datos recibidos:', data); // Debug: Imprimir datos recibidos
         alert(mensajeExito);
         location.reload();
     })
     .catch(error => {
-        console.error('Error:', error);
+        console.error('Error capturado:', error); // Debug: Imprimir errores
         alert('Error al cambiar el estado de la lista');
     });
 }
