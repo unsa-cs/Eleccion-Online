@@ -1,9 +1,9 @@
-from app import db
-from sqlalchemy import Enum
-from app import ma
-from app.models.Propuesta import Propuesta
-from app.models.Candidato import Candidato
 import enum
+
+from sqlalchemy import Enum
+
+from app import db
+from app import ma
 
 class EstadoListaEnum(enum.Enum):
     aprobado = "aprobado"

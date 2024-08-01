@@ -195,16 +195,14 @@ class CandidatoServicioImpl(ICandidatoServicio):
         return self.get_candidatos(True)
 
     def get_candidatos_inscritos(self):
-        candidatos = Candidato.query \
-            .filter(Candidato.denegado == False) \
-            .all()
+        try:
+            candidatos = Candidato.query.all()
+            result = [candidato_schema.dump(candidato) for candidato in candidatos]
+            return result  
+        except Exception as e:
+            logger.error(f'Error al obtener candidatos inscritos: {str(e)}')
+            raise e
 
-        result = []
-        for candidato in candidatos:
-            candidato_data = candidato_schema.dump(candidato)
-            result.append(candidato_data)
-
-        return result
 
 class ListaServicioImpl(IListaServicio):
     def obtener_listas(self):
