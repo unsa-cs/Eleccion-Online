@@ -8,6 +8,8 @@ class Propuesta(db.Model):
     denegada = db.Column(db.Boolean, nullable=True, default=False)
     id_lista = db.Column(db.Integer, db.ForeignKey('listacandidato.id_lista'), nullable=True)
 
+    lista_candidato = db.relationship('ListaCandidato', backref='propuestas_list', lazy=True)
+
     def __init__(self, descripcion, id_lista, denegada=False):
         self.descripcion = descripcion
         self.id_lista = id_lista
@@ -19,6 +21,6 @@ class PropuestaSchema(ma.Schema):
             'id_propuesta',
             'descripcion',
             'denegada',
-            'id_lista_candidato'
+            'id_lista'
         )
 
