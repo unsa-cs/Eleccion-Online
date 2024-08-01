@@ -1,375 +1,361 @@
-# Aplicación de Principios de Clean Code, SOLID y Estilos de Programacion
-Este documento detalla cómo se aplican los principios de Clean Code y SOLID en el proyecto actual, utilizando Python y SQLAlchemy para modelar una base de datos y Flask-RESTful para el manejo de servicios.
+# Clean Code
 
-## Aplicación de Principios SOLID
-## 1. Principio de Responsabilidad Única (SRP)
-Cada clase debe tener una única responsabilidad. Esto significa que cada clase debe hacer una sola cosa y hacerla bien.
-```python
-class Eleccion(db.Model):
-    __tablename__ = 'eleccion'
-    
-    id_eleccion = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    fecha = db.Column(db.Date, nullable=True)
-    hora_inicio = db.Column(db.Time, nullable=True)
-    hora_fin = db.Column(db.Time, nullable=True)
-    estado = db.Column(Enum('abierto', 'cerrado', name='estado_enum'), nullable=True)
-    descripcion = db.Column(db.String(100), nullable=True)
-    listas = db.relationship('ListaCandidato', backref="eleccion")
-    
-    def __init__(self, fecha, hora_inicio, hora_fin, estado, descripcion):
-        self.fecha = fecha
-        self.hora_inicio = hora_inicio
-        self.hora_fin = self.hora_fin
-        self.estado = estado
-        self.descripcion = descripcion
+## Nombres
+
+En los siguientes codigos se muestras las aplicaciones del clean code, como es indicado por el Naming Convetions.
+
+1. Las clases en Python en deben ser en CamelCase.
+2. Las variables en Pyhton usan el estilo de snake_case.
+3. Descripcion clara de nombres aplicados.
 
 ```
-La clase Eleccion maneja únicamente la información de una elección, cumpliendo así con el principio de responsabilidad única.
-## 2. Principio de Abierto/Cerrado (OCP)
-Las entidades de software (clases, módulos, funciones, etc.) deben estar abiertas para la extensión, pero cerradas para la modificación. Esto significa que se debe poder añadir nuevo comportamiento sin modificar el código existente.
-
-Ejemplo:
-```python
-class EleccionServicioImpl(IEleccionServicio):
-    def get_all_eleccion(self):
-        try:
-            all_eleccion = Eleccion.query.all()
-            result = eleccion_schemas.dump(all_eleccion)
-            return result
-        except Exception as e:
-            logger.error(f'Error al obtener todas las elecciones: {str(e)}')
-            raise e
-```
-Si se necesita agregar un nuevo método para manejar elecciones, se puede extender EleccionServicioImpl sin modificar los métodos existentes.
-
-## 3. Principio de Sustitución de Liskov (LSP)
-Los objetos de un programa deben ser reemplazables por instancias de sus subtipos sin alterar el funcionamiento del programa.
-
-Ejemplo:
-```python
-class EleccionServicioImpl(IEleccionServicio):
-    def get_all_eleccion(self):
-        try:
-            all_eleccion = Eleccion.query.all()
-            result = eleccion_schemas.dump(all_eleccion)
-            return result
-        except Exception as e:
-            logger.error(f'Error al obtener todas las elecciones: {str(e)}')
-            raise e
-```
-EleccionServicioImpl puede ser sustituida por cualquier otra implementación de IEleccionServicio sin alterar el funcionamiento del programa.
-# Aplicación de Principios de Clean Code
-## 1. Nombres Descriptivos
-Ejemplo en la clase Eleccion:
-```python
-class Eleccion(db.Model):
-    __tablename__ = 'eleccion'
-    
-    id_eleccion = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    fecha = db.Column(db.Date, nullable=True)
-    hora_inicio = db.Column(db.Time, nullable=True)
-    hora_fin = db.Column(db.Time, nullable=True)
-    estado = db.Column(Enum('abierto', 'cerrado', name='estado_enum'), nullable=True)
-    descripcion = db.Column(db.String(100), nullable=True)
-    listas = db.relationship('ListaCandidato', backref="eleccion")
-    
-    def __init__(self, fecha, hora_inicio, hora_fin, estado, descripcion):
-        self.fecha = fecha
-        self.hora_inicio = hora_inicio
-        self.hora_fin = hora_fin
-        self.estado = estado
-        self.descripcion = descripcion
-
-```
-Ejemplo en la clase ListaCandidato:
-```python
-class ListaCandidato(db.Model):
-    __tablename__ = 'lista_candidato'
-    
-    id_lista = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    nombre = db.Column(db.String(100), nullable=True)
-    id_eleccion = db.Column(db.Integer, db.ForeignKey('eleccion.id_eleccion'), nullable=True)
-    lista_voto = db.relationship('Voto', backref="lista_candidato")
-
-    def __init__(self, nombre, id_eleccion):
-        self.nombre = nombre
-        self.id_eleccion = id_eleccion
-
-```
-## 2. Cohesión
-Responsabilidad Única:
-Cada clase tiene una sola responsabilidad:
-
-1. La clase Eleccion maneja la información de una elección.
-2. La clase ListaCandidato maneja la información de las listas de candidatos.
-
-Ejemplo:
-```python
-class Eleccion(db.Model):
-    # Definición de atributos y métodos relacionados con elecciones
-
-class ListaCandidato(db.Model):
-    # Definición de atributos y métodos relacionados con listas de candidatos
-
-```
-## 3. Encapsulación
-Atributos Privados:
-Los atributos se acceden y modifican a través de métodos. Aunque no se muestran explícitamente como privados, se sigue la convención de encapsulamiento.
-
-Ejemplo en la clase Eleccion:
-
-python
-```python
-class Eleccion(db.Model):
-    # Definición de atributos y métodos relacionados con elecciones
-```
-## 4. Consistencia
-Convenciones de Nombres:
-Las tablas en la base de datos están nombradas en formato snake_case, y las clases en formato CamelCase.
-
-Ejemplo:
-```python
-class Eleccion(db.Model):
-    __tablename__ = 'eleccion'
-    # ...
-
-class ListaCandidato(db.Model):
-    __tablename__ = 'lista_candidato'
-    # ...
-```
-## 5. Evitar Código Duplicado
-Uso de Esquemas:
-El esquema EleccionSchema se define una sola vez y se reutiliza para serializar datos.
-
-Ejemplo:
-
-```python
-class EleccionSchema(ma.Schema):
-    class Meta:
-        fields = (
-            'id_eleccion',
-            'fecha',
-            'hora_inicio',
-            'hora_fin',
-            'estado',
-            'descripcion',
-            'listas'
-        )
-```
-## 6. Separación de Preocupaciones
-Servicios y Modelos:
-El código está dividido en modelos y servicios. Los modelos (Eleccion, ListaCandidato) definen la estructura de la base de datos, mientras que los servicios (EleccionServicioImpl) manejan la lógica de negocio.
-
-Ejemplo en EleccionServicioImpl:
-
-```python
-from app.models import Eleccion, EleccionSchema
-from app import ma
-from app.services.IEleccionServicio import IEleccionServicio
-
-eleccion_schema = EleccionSchema()
-eleccion_schemas = EleccionSchema(many=True)
-
-class EleccionServicioImpl(IEleccionServicio):
-    def get_all_eleccion(self):
-        all_eleccion = Eleccion.query.all()
-        result = eleccion_schemas.dump(all_eleccion)
-        return result
-```
-# Estilos de Programación
-## 1. Things (Uso de Interfaces y Clases Abstractas)
-Estás utilizando interfaces (clases abstractas) para definir el comportamiento esperado de diferentes servicios en tu sistema. Esto es un ejemplo claro del estilo Things, ya que encapsulas comportamientos en abstracciones claras y reutilizables.
-```python
-from abc import ABC, abstractmethod
-
-class IEleccionServicio(ABC):
-    @abstractmethod
-    def get_all_eleccion(self):
-        pass
-    @abstractmethod
-    def get_candidatos_by_eleccion(self, int):
-        pass
-    @abstractmethod
-    def get_all_eleccion_abiertas(self):
-        pass
-    @abstractmethod
-    def insert_eleccion(self, eleccion):
-        pass
-    @abstractmethod
-    def get_elector_by_email(self, email):
-        pass
-    @abstractmethod
-    def get_elecciones_hechas_por_elector(self, id_elector):
-        pass
-
-class IVotoServicio(ABC):
-    @abstractmethod
-    def get_voto_by_elector(self, id_elector):
-        pass 
-    @abstractmethod
-    def votar(self, id_lista, id_elector):
-        pass
-    @abstractmethod
-    def get_all_votos(self):
-        pass
-def ver_votos():
-    votos = voto_servicio.get_all_votos()
-    return render_template("ProcesoVotacion/votos.html", data = votos)
-
-@home_bp.route('/Votar', methods=['POST'])
-@login_required
-def votar():
-    id_lista = request.form['id_lista']
-    elector = eleccion_servicio.get_elector_by_email(session['correo'])
-    voto_servicio.votar(id_lista, elector.id)
-    return redirect(url_for('home_bp.dashboard'))
-```
-## 2. Error/Exception Handling (Gestión de Errores y Excepciones)
-Estás manejando errores en varias partes de tu código usando bloques try y except. Esto asegura que las excepciones sean capturadas y gestionadas adecuadamente, proporcionando información útil en los logs.
-```python
-class EleccionServicioImpl(IEleccionServicio):
-    def get_all_eleccion(self):
-        try:
-            all_eleccion = Eleccion.query.all()
-            result = eleccion_schemas.dump(all_eleccion)
-            return result
-        except Exception as e:
-            logger.error(f'Error al obtener todas las elecciones: {str(e)}')
-            raise e
-
-    def get_candidatos_by_eleccion(self, id_eleccion):
-        try:
-            all_candidatos = db.session.query(
-                Candidato.nombres, 
-                Candidato.apellido_paterno, 
-                Candidato.apellido_materno, 
-                ListaCandidato.nombre, 
-                Candidato.id
-            ).join(
-                ListaCandidato, ListaCandidato.id_lista == Candidato.id_lista_candidato
-            ).filter(
-                ListaCandidato.id_eleccion == id_eleccion
-            ).all()
-            result = [{"Candidato": '%s %s %s' % (tupla[0], tupla[1], tupla[2]), "Lista": tupla[3], "id_candidato": tupla[4]} for tupla in all_candidatos]
-            return result
-        except Exception as e:
-            logger.error(f'Error al obtener los candidatos por elección: {str(e)}')
-            raise e
-```
-## 3. Restful (Implementación de Servicios Web REST)
-Estás implementando rutas en Flask que responden a diferentes métodos HTTP, lo cual es un ejemplo claro del estilo Restful. Cada ruta define un recurso y las operaciones que se pueden realizar sobre él.
-```python
-@home_bp.route('/Votos')
-def ver_votos():
-    votos = voto_servicio.get_all_votos()
-    return render_template("ProcesoVotacion/votos.html", data = votos)
-
-@home_bp.route('/EleccionVotacion', methods=['GET'])
-@login_required
-def seleccionar_eleccion_votacion():
-    elector = eleccion_servicio.get_elector_by_email(session['correo'])
-    elecciones = eleccion_servicio.get_all_eleccion()
-    elecciones_hechas = eleccion_servicio.get_elecciones_hechas_por_elector(elector.id)
-    elecciones_restantes = len(elecciones) - len(elecciones_hechas)
-    return render_template('ProcesoVotacion/lista_eleccion_votacion.html', data = elecciones, elecciones_hechas = elecciones_hechas, elecciones_restantes = elecciones_restantes)
-
-@home_bp.route('/CandidatosVotacion', methods=['POST'])
-@login_required
-def ver_candidatos_votacion():
-    id_eleccion = request.form['voto']
-    candidatos = lista_servicio.get_lista_by_eleccion(id_eleccion)
-    return render_template('ProcesoVotacion/votacion.html', data = candidatos)
-
-@home_bp.route('/Resumen', methods=['POST'])
-@login_required
-def resumir_votacion():
-    id_lista = request.form['id_lista']
-    lista = lista_servicio.get_lista_by_id(id_lista)
-    return render_template('ProcesoVotacion/resumen.html', data = lista)
-
-@home_bp.route('/Votar', methods=['POST'])
-@login_required
-def votar():
-    id_lista = request.form['id_lista']
-    elector = eleccion_servicio.get_elector_by_email(session['correo'])
-    voto_servicio.votar(id_lista, elector.id)
-    return redirect(url_for('home_bp.dashboard'))
-
-```
-## 4. Persistent-Tables (Tablas Persistentes)   
-Este estilo se refiere a la creación y manejo de tablas en una base de datos que persisten datos a través de las sesiones. Aquí, la clase Eleccion es un modelo de SQLAlchemy que define una tabla en la base de datos, con sus columnas y relaciones.
-```python
-class Eleccion(db.Model):
-    __tablename__ = 'eleccion'
-
-    id_eleccion = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    fecha = db.Column(db.Date, nullable=True)
-    hora_inicio = db.Column(db.Time, nullable=True)
-    hora_fin = db.Column(db.Time, nullable=True)
-    estado = db.Column(Enum('abierto', 'cerrado', name='estado_enum'), nullable=True)
-    descripcion = db.Column(db.String(100), nullable=True)
-    listas = db.relationship('ListaCandidato', backref=("eleccion"))
-    
-    def __init__(self, fecha, hora_inicio, hora_fin, estado, descripcion):
-        self.fecha = fecha
-        self.hora_inicio = hora_inicio
-        self.hora_fin = hora_fin
-        self.estado = estado
-        self.descripcion = descripcion
 class Elector(db.Model):
-    __tablename__ = 'elector'
-
     id = db.Column(db.Integer, primary_key=True)
     nombres = db.Column(db.String(100), nullable=False)
     apellido_paterno = db.Column(db.String(100), nullable=False)
     apellido_materno = db.Column(db.String(100), nullable=False)
     fecha_nacimiento = db.Column(db.Date, nullable=False)
     usuario = db.Column(db.String(50), unique=True, nullable=False)
-    contrasena = db.Column(db.String(80), nullable=False)
+    contrasena = db.Column(db.String(100), nullable=False)
     correo = db.Column(db.String(100), nullable=False)
-
-    def __init__(self, nombres, apellido_paterno, apellido_materno, fecha_nacimiento, usuario, contrasena, correo):
-        self.nombres = nombres
-        self.apellido_paterno = apellido_paterno
-        self.apellido_materno = apellido_materno
-        self.fecha_nacimiento = fecha_nacimiento
-        self.usuario = usuario
-        self.contrasena = bcrypt.hashpw(contrasena.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-        self.correo = correo
-
-class Candidato(db.Model):
-    __tablename__ = 'candidato'
-    id_candidato  = db.Column(db.Integer, primary_key=True)
-    nombres = db.Column(db.String(100), nullable=False)
-    apellido_paterno = db.Column(db.String(100), nullable=False)
-    apellido_materno = db.Column(db.String(100), nullable=False)
-    id_lista = db.Column(db.Integer, db.ForeignKey('listacandidato.id_lista'), nullable=True)
-
-    def __init__(self, nombres, apellido_paterno, apellido_materno, id_lista_candidato):
-        self.nombres = nombres
-        self.apellido_paterno = apellido_paterno
-        self.apellido_materno = apellido_materno
-        self.id_lista_candidato = id_lista_candidato
 ```
-## 5. Cookbook (Patrones Comunes)
-Definir un esquema de serialización usando marshmallow es un ejemplo de un patrón común, donde defines cómo se deben serializar/deserializar los datos de tu modelo. Aquí, EleccionSchema es un esquema que especifica los campos que se deben incluir al serializar una instancia de Eleccion.
-```python
-class EleccionSchema(ma.Schema):
-    class Meta:
-        fields = (
-            'id_eleccion',
-            'fecha',
-            'hora_inicio',
-            'hora_fin',
-            'estado',
-            'descripcion',
-            'listas'
+
+## Funciones
+
+En el siguiente codigo aplicamos clean code en funciones, deben ser pequeñas y realizar un tarea especifica.
+
+```
+def hash_constrasena(self, contrasena):
+    return bcrypt.hashpw(contrasena.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+def revisar_contrasena(self, contrasena):
+    return bcrypt.checkpw(contrasena.encode('utf-8'), self.contrasena.encode('utf-8'))
+
+```
+
+## Comentarios
+
+El codigo debe ser claro para que los comentarios extensos no sean necesarios. Los comentarios, deben agregar valor explicativo.
+
+```
+def emitir_voto(self, candidato_id):
+    # Lógica para emitir el voto
+    pass
+```
+
+## Errores
+
+En el siguiente codigo se maneja los errore con Unchecked Exceptions.
+
+```
+def create_elector(self, elector_modelo):
+    elector = Elector(
+        nombres=elector_modelo.nombres,
+        apellido_paterno=elector_modelo.apellido_paterno,
+        apellido_materno=elector_modelo.apellido_materno,
+        fecha_nacimiento=elector_modelo.fecha_nacimiento,
+        usuario=elector_modelo.usuario,
+        contrasena=elector_modelo.contrasena,
+        correo=elector_modelo.correo
+    )
+    try:
+        db.session.add(elector)
+        db.session.commit()
+        logger.info(f'Elector creado correctamente: {elector}')
+        return elector
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f'Error al crear el elector: {str(e)}')
+        raise e
+
+def update_elector(self, elector: Elector):
+    try:
+        db.session.merge(elector)
+        db.session.commit()
+        logger.info(f'Elector actualizado correctamente: {elector}')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f'Error al actualizar el elector: {str(e)}')
+        raise e
+
+def delete_elector(self, elector: Elector):
+    try:
+        db.session.delete(elector)
+        db.session.commit()
+        logger.info(f'Elector eliminado correctamente: {elector}')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f'Error al eliminar el elector: {str(e)}')
+        raise e
+```
+
+```
+@home_bp.route('/electores', methods=['GET','POST'])
+def crear_elector():
+    try:
+        data = request.form
+        elector = Elector(
+            ...
+            correo=data.get('correo')
         )
-class VotoSchema(ma.Schema):
-    class Meta:
-        fields = (
-            'id_voto',
-            'id_elector',
-            'id_lista_candidato'
+
+        elector_service.create_elector(elector)
+        mensaje = 'Elector creado correctamente'
+
+        return render_template('register.html', mensaje=mensaje)
+    except Exception as e:
+        mensaje_error = f"Error al crear el elector: {str(e)}"
+        logger.error(mensaje_error)
+        return render_template('register.html', mensaje=mensaje_error)
+```
+
+# Principios SOLID
+
+## Principio de Responsabilidad Unica (SRP)
+
+Se ha separado la logica de manejo de formularios y la logica de negocios en diferentes clases.
+
+```
+@home_bp.route('/register', methods=['GET','POST'])
+def register():
+    REGISTER_HTML = 'register.html'
+    try:
+        if request.method == 'POST':
+            data = request.form
+            elector = Elector(
+                nombres=data.get('nombres'),
+                apellido_paterno=data.get('apellido_paterno'),
+                apellido_materno=data.get('apellido_materno'),
+                fecha_nacimiento=data.get('fecha_nacimiento'),
+                usuario=data.get('usuario'),
+                contrasena=data.get('contrasena'),
+                correo=data.get('correo')
+            )
+
+            elector_service.create_elector(elector,data.get('contrasena'))
+            mensaje = 'Elector creado correctamente'
+            return render_template(REGISTER_HTML, mensaje=mensaje)
+
+        return render_template(REGISTER_HTML)
+    except Exception as e:
+        mensaje_error = f"Error al crear el elector: {str(e)}"
+        logger.error(mensaje_error)
+        return render_template(REGISTER_HTML, mensaje=mensaje_error)
+```
+
+## Principio de Sustitucion de Liskov (LSP)
+
+Se implemento la clase ElectorService como base para que luego puedan ser implementadas sin alterar su funcionamiento, con clases Derivadas.
+
+```
+from abc import ABC, abstractmethod
+
+class ElectorService(ABC):
+    @abstractmethod
+    def get_elector_by_id(self, id):
+        pass
+
+    @abstractmethod
+    def create_elector(self, elector_dto):
+        pass
+
+    @abstractmethod
+    def update_elector(self, elector):
+        pass
+
+    @abstractmethod
+    def delete_elector(self, elector):
+        pass
+
+```
+
+## Principio Abierto/Cerrado (OCP)
+
+Se usa un interfaz para ElectorServiceImpl que permite extender la funcionalidad sin necesidad de modificar el codigo existente
+
+```
+class ElectorServiceImpl(ElectorService):
+    def get_elector_by_id(self, id):
+        try:
+            return Elector.query.get(id)
+        except Exception as e:
+            logger.error(f'Error al obtener el elector por ID: {str(e)}')
+            raise e
+
+    def create_elector(self, elector_modelo, contrasena:str):
+        elector = Elector(
+            nombres=elector_modelo.nombres,
+            apellido_paterno=elector_modelo.apellido_paterno,
+            apellido_materno=elector_modelo.apellido_materno,
+            fecha_nacimiento=elector_modelo.fecha_nacimiento,
+            usuario=elector_modelo.usuario,
+            contrasena=contrasena,
+            correo=elector_modelo.correo
         )
+        try:
+            db.session.add(elector)
+            db.session.commit()
+            logger.info(f'Elector creado correctamente: {elector}')
+            return elector
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f'Error al crear el electbor: {str(e)}')
+            raise e
+
+    def update_elector(self, elector: Elector):
+        try:
+            db.session.merge(elector)
+            db.session.commit()
+            logger.info(f'Elector actualizado correctamente: {elector}')
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f'Error al actualizar el elector: {str(e)}')
+            raise e
+
+    def delete_elector(self, elector: Elector):
+        try:
+            db.session.delete(elector)
+            db.session.commit()
+            logger.info(f'Elector eliminado correctamente: {elector}')
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f'Error al eliminar el elector: {str(e)}')
+            raise e
+```
+
+# Estilos de Programación
+
+## Pipeline
+
+Las operaciones siguen una secuencia lógica de pasos. Por ejemplo, en `create_elector`, se verifican los datos del elector, se crea una nueva instancia y finalmente se intenta guardar en la base de datos. Similarmente, en los métodos de las rutas, se siguen pasos secuenciales desde la recepción de datos hasta la respuesta final al usuario.
+
+```
+def create_elector(self, elector_modelo, contrasena: str):
+    existing_elector = Elector.query.filter_by(correo=elector_modelo.correo).first()
+    if existing_elector:
+        raise ValueError("Ya existe un elector con este correo.")
+    elector = Elector(
+        nombres=elector_modelo.nombres,
+        apellido_paterno=elector_modelo.apellido_paterno,
+        apellido_materno=elector_modelo.apellido_materno,
+        fecha_nacimiento=elector_modelo.fecha_nacimiento,
+        usuario=elector_modelo.usuario,
+        contrasena=contrasena,
+        correo=elector_modelo.correo
+    )
+    try:
+        db.session.add(elector)
+        db.session.commit()
+        logger.info(f'Elector creado correctamente: {elector}')
+        return elector
+    except IntegrityError as e:
+        db.session.rollback()
+        logger.error(f'Error al crear el elector: {str(e)}')
+        raise ValueError("Error al crear el elector: ya existe un elector con este correo.:")
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f'Error al crear el elector: {str(e)}')
+        raise e
+```
+
+## Cookbook
+
+Se siguen patrones comunes como CRUD (Create, Read, Update, Delete) para la gestión de electores. Los métodos `create_elector`, `get_elector_by_id`, `update_elector`, y `delete_elector` son ejemplos claros de este enfoque. Asimismo, las rutas para registro, login, dashboard y logout siguen patrones típicos de manejo de sesiones y autenticación.
+
+```
+class ElectorServiceImpl(ElectorService):
+    def get_elector_by_id(self, id):
+        return Elector.query.get(id)
+
+    def update_elector(self, elector: Elector):
+        try:
+            db.session.merge(elector)
+            db.session.commit()
+            logger.info(f'Elector actualizado correctamente: {elector}')
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f'Error al actualizar el elector: {str(e)}')
+            raise e
+
+    def delete_elector(self, elector: Elector):
+        try:
+            db.session.delete(elector)
+            db.session.commit()
+            logger.info(f'Elector eliminado correctamente: {elector}')
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f'Error al eliminar el elector: {str(e)}')
+            raise e
+
+```
+
+## RESTful
+
+Las rutas definidas como `/register`, `/login`, `/dashboard`, y `/logout` están diseñadas para interactuar con los recursos `Elector`, siguiendo las convenciones de los métodos HTTP y los principios RESTful:
+
+```
+@home_bp.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        # Manejo de registro POST
+        # ...
+        return render_template('register.html', mensaje=mensaje)
+    return render_template('register.html')
+
+@home_bp.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        # Manejo de login POST
+        # ...
+        return render_template('dashboard.html', elector=elector)
+    return render_template('login.html')
+
+@home_bp.route('/logout')
+def logout():
+    # Manejo de logout
+    return redirect(url_for('home_bp.login'))
+
+```
+
+## Programación Defensiva
+
+Se anticipan y manejan posibles errores, como al verificar si un elector ya existe antes de crearlo o al manejar excepciones durante las operaciones de base de datos y la lógica de negocio. También se verifican las credenciales de login y se manejan las sesiones de usuario de manera segura.
+
+```
+def create_elector(self, elector_modelo, contrasena: str):
+    existing_elector = Elector.query.filter_by(correo=elector_modelo.correo).first()
+    if existing_elector:
+        raise ValueError("Ya existe un elector con este correo.")
+    # ...
+```
+
+## Programación Declarativa (Uso de ORM)
+
+Se utiliza SQLAlchemy como ORM para interactuar con la base de datos de manera declarativa. Por ejemplo, `Elector.query.filter_by(correo=correo).first()` declara el criterio de búsqueda sin especificar detalles de implementación.
+
+```
+def get_elector_by_id(self, id):
+    return Elector.query.get(id)
+
+existing_elector = Elector.query.filter_by(correo=correo).first()
+```
+
+## Programación Basada en Excepciones
+
+El uso de bloques `try`, `except` y `raise` para manejar errores y situaciones excepcionales es evidente en varias partes del código, asegurando que los errores se manejen adecuadamente y se registre la información relevante mediante el uso de `logger`.
+
+```
+try:
+    db.session.add(elector)
+    db.session.commit()
+    logger.info(f'Elector creado correctamente: {elector}')
+    return elector
+except IntegrityError as e:
+    db.session.rollback()
+    logger.error(f'Error al crear el elector: {str(e)}')
+    raise ValueError("Error al crear el elector: ya existe un elector con este correo.")
+except Exception as e:
+    db.session.rollback()
+    logger.error(f'Error al crear el elector: {str(e)}')
+    raise e
 ```

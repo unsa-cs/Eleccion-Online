@@ -18,6 +18,13 @@ from app.services.PersonaServicioImpl import ElectorServiceImpl
 from app.services.EleccionServicioImpl import EleccionServicioImpl
 
 
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+import bcrypt
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -32,7 +39,18 @@ lista_servicio = ListaServicioImpl()
 candidato_servicio = CandidatoServicioImpl()
 voto_servicio = VotoServicioImpl()
 
-@home_bp.route('/Admin')
+def admin_required(f):
+    @wraps(f)
+    def decorated_function_admin(*args, **kwargs):
+        logger.info(f"Verificando acceso: sesión actual {session}")
+        if not session.get('admin'):
+            logger.info(f"Usuario no autorizado, sesión: {session}")
+            return render_template("login.html")  # Redirige a la ruta 'index' o la ruta de inicio
+        return f(*args, **kwargs)
+    return decorated_function_admin
+
+@home_bp.route('/Admins')
+@admin_required
 def home():
     return render_template('Admin/home.html')
 
@@ -90,7 +108,8 @@ def listar_candidatos_elector():
     return render_template('ListaCandidato/listas_aprobadas.html', listas = listas)
 
 
-@home_bp.route('/EleccionesActivas', methods=['GET'])       
+
+@home_bp.route('/EleccionesActivas', methods=['GET'])
 def listar_elecciones():
     elecciones_json = eleccion_servicio.get_all_eleccion(4)
     return render_template('lista_eleccion.html', elecciones = elecciones_json)
@@ -99,9 +118,9 @@ def listar_elecciones():
 @home_bp.route('/candidatos/<int:id>', methods=['GET'])
 def ver_lista_candidatos(id):
     listas_candidato = lista_servicio.get_lista_por_eleccion(id)
-    
+
     if listas_candidato is None:
-        abort(404)  
+        abort(404)
     return render_template('ListaCandidato/lista_candidatos.html', listas=listas_candidato)
 
 @home_bp.route('/ListasEleccionesVista', methods=['GET'])
@@ -178,7 +197,6 @@ def votar():
 def index():
     return render_template('index.html')
 
-
 @home_bp.route('/register', methods=['GET','POST'])
 def register():
     REGISTER_HTML = 'register.html'
@@ -214,7 +232,16 @@ def login():
             data = request.form
             correo = data.get('correo')
             contrasena = data.get('contrasena')
+            admin_email = os.getenv('ADMIN_EMAIL')
+            admin_password = os.getenv('ADMIN_PASSWORD')
+            if correo == admin_email and bcrypt.checkpw(contrasena.encode('utf-8'), admin_password.encode('utf-8')):
+                session['correo'] = admin_email
+                session['admin'] = True
+                return render_template('Admin/home.html')
             elector = Elector.query.filter_by(correo=correo).first()
+            if elector is None:
+                mensaje = 'Correo o contraseña incorrectos'
+                return render_template(LOGIN_HTML, mensaje=mensaje)
             voto = voto_servicio.get_voto_by_elector(elector.id)
             if elector and elector.revisar_contrasena(contrasena):
                 session['correo'] = elector.correo
@@ -273,7 +300,6 @@ def mostrar_candidatos():
     candidatos_inscritos = candidato_servicio.get_candidatos_inscritos()
 
     return render_template(
-        'a/candidatos.html', 
+        'a/candidatos.html',
         candidatos_inscritos=candidatos_inscritos
     )
-
