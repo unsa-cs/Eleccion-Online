@@ -40,6 +40,9 @@ class IVotoServicio(ABC):
     @abstractmethod
     def get_all_votos(self):
         pass
+    @abstractmethod
+    def get_cant_votos_by_eleccion(self, id_eleccion = 1):
+        pass
 
 
 class ICandidatoServicio(ABC):
@@ -57,7 +60,7 @@ class IListaServicio(ABC):
     def obtener_listas(self):
         pass
     @abstractmethod
-    def get_lista_by_eleccion(self, id_eleccion):
+    def get_lista_aprobada_by_eleccion(self, id_eleccion):
         pass
     
     @abstractmethod

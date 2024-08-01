@@ -135,7 +135,7 @@ def insert_eleccion():
 
 @home_bp.route('/Votos')
 def ver_votos():
-    votos = voto_servicio.get_all_votos()
+    votos = voto_servicio.get_cant_votos_by_eleccion()
     return render_template("ProcesoVotacion/votos.html", data = votos)
 
 
@@ -154,7 +154,7 @@ def seleccionar_eleccion_votacion():
 @login_required
 def ver_candidatos_votacion():
     id_eleccion = request.form['voto']
-    candidatos = lista_servicio.get_lista_by_eleccion(id_eleccion)
+    candidatos = lista_servicio.get_lista_aprobada_by_eleccion(id_eleccion)
     return render_template('ProcesoVotacion/votacion.html', data = candidatos)
 
 @home_bp.route('/Resumen', methods=['POST'])
