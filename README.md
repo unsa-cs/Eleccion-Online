@@ -45,11 +45,11 @@ La planificación de tareas de implementación se gestiona usando la herramienta
 
 ### Documento de requisitos de software actualizado
 
-Enlace
+[Requisitos](https://docs.google.com/document/d/14P_PVLfjSm_YSb5pkw98cLnqFf8kFPsR/edit?usp=sharing&ouid=103974025895514464791&rtpof=true&sd=true)
 
 ### Documento de arquitectura de software actualizado
 
-Enlace
+[Arquitectura](https://docs.google.com/document/d/1cbHVusBtsyzv-eA0EU2F89KYerfHQLAP/edit?usp=sharing&ouid=103974025895514464791&rtpof=true&sd=true)
 
 ### Documentacion del Proyecto en GitHub
 
