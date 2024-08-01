@@ -1,3 +1,5 @@
+import datetime
+import logging
 from app import db
 from flask import jsonify
 from sqlalchemy import func
@@ -9,6 +11,8 @@ from app.models.Eleccion import EleccionSchema
 from app.models.Candidato import Candidato
 from app.models.Candidato import CandidatoSchema
 from app.models.ListaCandidato import ListaCandidato
+from app.models.ListaCandidato import ListaCandidatoSchema
+from app.models.ListaCandidato import EstadoListaEnum
 from app.models.Elector import Elector
 from app.models.Voto import Voto
 from app.models.Propuesta import Propuesta
@@ -248,7 +252,6 @@ class ListaServicioImpl(IListaServicio):
                 ListaCandidato.id_lista
             ).filter(
                 ListaCandidato.id_eleccion == id_eleccion
-            ).all()
             ).filter(ListaCandidato.estado == "aprobado").all()
             result = [{"nombre": tupla[0], "id_lista": tupla[1]} for tupla in all_listas]
             print(result)
