@@ -102,6 +102,11 @@ def listar_candidatos_elector():
     listas = lista_servicio.obtener_listas_aprobadas()
     return render_template('ListaCandidato/listas_aprobadas.html', listas = listas)
 
+@home_bp.route('/ListasElecciones', methods=['GET'])
+def listas_candidatos_elector():
+    listas = lista_servicio.obtener_listas_aprobadas()
+    return render_template('ListaCandidato/listas_aprobadas.html', listas = listas)
+
 
 
 @home_bp.route('/EleccionesActivas', methods=['GET'])
