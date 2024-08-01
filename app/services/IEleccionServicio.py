@@ -25,6 +25,10 @@ class IEleccionServicio(ABC):
     def get_elecciones_hechas_por_elector(self, id_elector):
         pass
 
+    @abstractmethod
+    def get_all_elecciones(self):
+        pass
+
 class IVotoServicio(ABC):
     @abstractmethod
     def get_voto_by_elector(self, id_elector):

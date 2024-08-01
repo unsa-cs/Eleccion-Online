@@ -135,7 +135,7 @@ def insert_eleccion():
 
 @home_bp.route('/Votos')
 def ver_votos():
-    elecciones = eleccion_servicio.get_all_eleccion()
+    elecciones = eleccion_servicio.get_all_elecciones()
     votos = {}
     for eleccion in elecciones:
         votos[eleccion['id_eleccion']] = voto_servicio.get_cant_votos_by_eleccion(eleccion['id_eleccion'])
@@ -146,29 +146,20 @@ def ver_votos():
 @home_bp.route('/EleccionVotacion', methods=['GET'])
 @login_required
 def seleccionar_eleccion_votacion():
-<<<<<<< HEAD
     elector = elector_service.get_elector_by_email(session['correo'])
-    elecciones = eleccion_servicio.get_all_eleccion()
+    elecciones = eleccion_servicio.get_all_eleccion(2)
     elecciones_hechas = eleccion_servicio.get_elecciones_hechas_por_elector(elector.id)
     elecciones_restantes = len(elecciones) - len(elecciones_hechas)
     return render_template('ProcesoVotacion/lista_eleccion_votacion.html', \
                            data = elecciones, elecciones_hechas = elecciones_hechas, \
                             elecciones_restantes = elecciones_restantes)
-=======
-    elector = eleccion_servicio.get_elector_by_email(session['correo'])
-    voto = voto_servicio.get_voto_by_elector(elector.id)
-    if voto:
-        return redirect(url_for('home_bp.dashboard'))
-    elecciones_abiertas_json = eleccion_servicio.get_all_eleccion_abiertas()
-    return render_template('ProcesoVotacion/lista_eleccion_votacion.html', data = elecciones_abiertas_json)
-
->>>>>>> 0f4d24298951cb58173c158ada7a7083cd29437c
 
 @home_bp.route('/ListaVotacion', methods=['POST'])
 @login_required
 def ver_candidatos_votacion():
     id_eleccion = request.form['voto']
     candidatos = lista_servicio.get_lista_aprobada_by_eleccion(id_eleccion)
+    print(candidatos)
     return render_template('ProcesoVotacion/votacion.html', data = candidatos)
 
 @home_bp.route('/Resumen', methods=['POST'])
@@ -266,25 +257,6 @@ def logout():
         session.clear()
     return redirect(url_for(LOGIN_ROUTE))
 
-<<<<<<< HEAD
-=======
-
-@home_bp.route('/electores/<int:id>', methods=['GET'])
-def get_elector(id):
-    return
-
-
-@home_bp.route('/electores/<int:id>', methods=['PUT'])
-def actualizar_elector(id):
-    return
-
-
-@home_bp.route('/electores/<int:id>', methods=['DELETE'])
-def eliminar_elector(id):
-    return
-
-
->>>>>>> 0f4d24298951cb58173c158ada7a7083cd29437c
 @home_bp.route('/candidatos')
 def mostrar_candidatos():
     candidatos_inscritos = candidato_servicio.get_candidatos_inscritos()
