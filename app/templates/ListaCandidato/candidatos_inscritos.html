@@ -1,0 +1,33 @@
+{% extends "Admin/home.html" %}
+
+{% block title %}Admin Page{% endblock %}
+
+{% block dashboard_content %}
+<div class="container mt-4">
+    <h2>Lista de Candidatos Inscritos</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombres</th>
+                <th>Apellido Paterno</th>
+                <th>Apellido Materno</th>
+                <th>Rol</th>
+                <th>Lista de Candidatos</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for candidato in candidatos %}
+            <tr>
+                <td>{{ candidato.id_candidato }}</td>
+                <td>{{ candidato.nombres }}</td>
+                <td>{{ candidato.apellido_paterno }}</td>
+                <td>{{ candidato.apellido_materno }}</td>
+                <td>{{ candidato.rol }}</td>
+                <td>{{ candidato.id_lista }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

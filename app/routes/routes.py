@@ -63,7 +63,7 @@ def mostrar_elecciones():
     eleccionesf = eleccion_servicio.get_elecciones_past()
     eleccionescurso = eleccion_servicio.get_elecciones_en_curso()
     eleccionespro = eleccion_servicio.get_elecciones_futuras()
-    return render_template('a/elecciones.html', eleccionespro=eleccionespro, eleccionesf=eleccionesf, eleccionescurso=eleccionescurso)
+    return render_template('General/elecciones.html', eleccionespro=eleccionespro, eleccionesf=eleccionesf, eleccionescurso=eleccionescurso)
 
 
 @home_bp.route('/ListasCandidatos', methods=['GET'])
@@ -124,11 +124,10 @@ def listas_candidatos_elector():
     listas = lista_servicio.obtener_listas_aprobadas()
     return render_template('ListaCandidato/listas_aprobadas.html', listas = listas)
 
-@home_bp.route('/VerListas', methods=['POST'])
+@home_bp.route('/VerListas', methods=['GET'])
 def ver_candidatos():
-    id_eleccion = request.form['eleccion_id']
-    result = lista_servicio.get_lista_by_eleccion(id_eleccion)
-    return render_template("lista_candidatos.html", data = result)
+    candidatos = candidato_servicio.get_candidatos_inscritos()
+    return render_template("ListaCandidato/candidatos_inscritos.html", candidatos = candidatos)
 
 @home_bp.route('/FormularioEleccion', methods=['GET'])
 def agregar_eleccion():
@@ -276,7 +275,7 @@ def logout():
 def mostrar_candidatos():
     candidatos_inscritos = candidato_servicio.get_candidatos_inscritos()
 
-    return render_template('a/candidatos.html', candidatos_inscritos=candidatos_inscritos)
+    return render_template('General/candidatos.html', candidatos_inscritos=candidatos_inscritos)
 
 @home_bp.route('/Inscripcion_cand', methods=['GET'])
 def inscripcion_cand():
