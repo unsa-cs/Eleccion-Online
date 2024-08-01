@@ -101,20 +101,26 @@ def insert_eleccion():
 
 @home_bp.route('/Votos')
 def ver_votos():
-    votos = voto_servicio.get_cant_votos_by_eleccion()
-    return render_template("ProcesoVotacion/votos.html", data = votos)
+    elecciones = eleccion_servicio.get_all_eleccion()
+    votos = {}
+    for eleccion in elecciones:
+        votos[eleccion['id_eleccion']] = voto_servicio.get_cant_votos_by_eleccion(eleccion['id_eleccion'])
+    print(len(votos))
+    return render_template("ProcesoVotacion/votos.html", data = votos, elecciones = elecciones)
 
 
 @home_bp.route('/EleccionVotacion', methods=['GET'])
 @login_required
 def seleccionar_eleccion_votacion():
-    elector = eleccion_servicio.get_elector_by_email(session['correo'])
+    elector = elector_service.get_elector_by_email(session['correo'])
     elecciones = eleccion_servicio.get_all_eleccion()
     elecciones_hechas = eleccion_servicio.get_elecciones_hechas_por_elector(elector.id)
     elecciones_restantes = len(elecciones) - len(elecciones_hechas)
-    return render_template('ProcesoVotacion/lista_eleccion_votacion.html', data = elecciones, elecciones_hechas = elecciones_hechas, elecciones_restantes = elecciones_restantes)
+    return render_template('ProcesoVotacion/lista_eleccion_votacion.html', \
+                           data = elecciones, elecciones_hechas = elecciones_hechas, \
+                            elecciones_restantes = elecciones_restantes)
 
-@home_bp.route('/CandidatosVotacion', methods=['POST'])
+@home_bp.route('/ListaVotacion', methods=['POST'])
 @login_required
 def ver_candidatos_votacion():
     id_eleccion = request.form['voto']
@@ -133,7 +139,7 @@ def resumir_votacion():
 @login_required
 def votar():
     id_lista = request.form['id_lista']
-    elector = eleccion_servicio.get_elector_by_email(session['correo'])
+    elector = elector_service.get_elector_by_email(session['correo'])
     voto_servicio.votar(id_lista, elector.id)
     return redirect(url_for('home_bp.dashboard'))
 
@@ -195,7 +201,7 @@ def login():
 @login_required
 def dashboard():
     if 'correo' in session:
-        elector = eleccion_servicio.get_elector_by_email(session['correo'])
+        elector = elector_service.get_elector_by_email(session['correo'])
         voto = voto_servicio.get_voto_by_elector(elector.id)
         response = make_response(render_template('dashboard.html', elector=elector, voto=voto))
         response.headers['Cache-Control'] = 'no-store'
@@ -211,18 +217,6 @@ def logout():
         session.pop('correo', None)
         session.clear()
     return redirect(url_for(LOGIN_ROUTE))
-
-@home_bp.route('/electores/<int:id>', methods=['GET'])
-def get_elector(id):
-    return
-
-@home_bp.route('/electores/<int:id>', methods=['PUT'])
-def actualizar_elector(id):
-    return
-
-@home_bp.route('/electores/<int:id>', methods=['DELETE'])
-def eliminar_elector(id):
-    return
 
 @home_bp.route('/candidatos')
 def mostrar_candidatos():

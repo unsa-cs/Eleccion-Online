@@ -72,13 +72,7 @@ class EleccionServicioImpl(IEleccionServicio):
             db.session.rollback()
             logger.error(f'Error al insertar la elección: {str(e)}')
             raise e
-    def get_elector_by_email(self, email):
-        try:
-            elector = Elector.query.filter_by(correo=email).first()
-            return elector
-        except Exception as e:
-            logger.error(f'Error al obtener el elector por email: {str(e)}')
-            raise e
+
     def get_elecciones_hechas_por_elector(self, id_elector):
         try:
             elecciones = db.session.query(ListaCandidato.id_eleccion).join(Voto, ListaCandidato.id_lista == Voto.id_lista)\
@@ -131,7 +125,7 @@ class VotoServicioImpl(IVotoServicio):
         ]
         return result
     
-    def get_cant_votos_by_eleccion(self, id_eleccion=1):
+    def get_cant_votos_by_eleccion(self, id_eleccion):
         try:
             cant_votos = db.session.query(ListaCandidato.nombre, func.count(Voto.id_voto)) \
                 .join(Voto, ListaCandidato.id_lista == Voto.id_lista) \
