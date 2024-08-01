@@ -237,33 +237,6 @@ class ListaServicioImpl(IListaServicio):
         except Exception as e:
             logger.error(f'Error al obtener las listas por elección: {str(e)}')
             raise e
-
-    def insert_lista_candidato(self, lista):
-        try:
-            db.session.add(lista)
-            db.session.commit()
-        except SQLAlchemyError as e:
-            db.session.rollback()
-            print(f"Error en la inserción de la lista: {e}")
-            raise e
-
-    def insert_candidato(self,candidato):
-        try:
-            db.session.add(candidato)
-            db.session.commit()
-        except SQLAlchemyError as e:
-            db.session.rollback()
-            print(f"Error en la inserción del candidato: {e}")
-            raise e
-
-    def insert_propuesta(self, propuesta):
-        try:
-            db.session.add(propuesta)
-            db.session.commit()
-        except SQLAlchemyError as e:
-            db.session.rollback()
-            print(f"Error en la inserción de la propuesta: {e}")
-            raise e
         
     def get_all_eleccion_abiertas(self):
         try:
@@ -370,7 +343,7 @@ class ListaServicioImpl(IListaServicio):
             resultado.append(lista_info)
         return resultado
     
-    def insert_lista_candidato(lista):
+    def insert_lista_candidato(self, lista):
         try:
             db.session.add(lista)
             db.session.commit()
@@ -379,7 +352,7 @@ class ListaServicioImpl(IListaServicio):
             print(f"Error en la inserción de la lista: {e}")
             raise e
 
-    def insert_candidato(candidato):
+    def insert_candidato(self, candidato):
         try:
             db.session.add(candidato)
             db.session.commit()
@@ -388,7 +361,7 @@ class ListaServicioImpl(IListaServicio):
             print(f"Error en la inserción del candidato: {e}")
             raise e
 
-    def insert_propuesta(propuesta):
+    def insert_propuesta(self, propuesta):
         try:
             db.session.add(propuesta)
             db.session.commit()

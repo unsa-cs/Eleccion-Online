@@ -23,10 +23,6 @@
                             <label for="apellido_materno{{ 0 }}">Apellido Materno</label>
                             <input type="text" class="form-control" id="apellido_materno{{ 0 }}" name="apellido_materno{{ 0 }}">
                         </div>
-                        <div class="form-group">
-                            <label for="dni{{ 0 }}">DNI</label>
-                            <input type="number" class="form-control" id="dni{{ 0 }}" name="dni{{ 0 }}">
-                        </div>
                         <hr>
                         {% for i in range(1,4) %}
                         <h6>Candidato {{ i }}</h6>
@@ -41,10 +37,6 @@
                         <div class="form-group">
                             <label for="apellido_materno{{ i }}">Apellido Materno</label>
                             <input type="text" class="form-control" id="apellido_materno{{ i }}" name="apellido_materno{{ i }}">
-                        </div>
-                        <div class="form-group">
-                            <label for="dni{{ i }}">DNI</label>
-                            <input type="number" class="form-control" id="dni{{ i }}" name="dni{{ i }}">
                         </div>
                         <hr>
                         {% endfor %}
