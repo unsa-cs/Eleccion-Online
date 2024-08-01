@@ -78,6 +78,7 @@ class EleccionServicioImpl(IEleccionServicio):
         except Exception as e:
             logger.error(f'Error al obtener los candidatos por elección: {str(e)}')
             raise e
+        
     def get_all_eleccion_abiertas(self):
         try:
             all_eleccion = Eleccion.query.filter(Eleccion.estado == "abierto").all()
@@ -86,6 +87,7 @@ class EleccionServicioImpl(IEleccionServicio):
         except Exception as e:
             logger.error(f'Error al obtener todas las elecciones abiertas: {str(e)}')
             raise e
+        
     def insert_eleccion(self, eleccion):
         try:
             db.session.add(eleccion)
@@ -135,6 +137,7 @@ class VotoServicioImpl(IVotoServicio):
         except Exception as e:
             logger.error(f'Error al obtener el voto del elector: {str(e)}')
             raise e
+        
     def votar(self, id_lista, id_elector):
         try:
             voto = Voto(id_elector, id_lista)
@@ -145,6 +148,7 @@ class VotoServicioImpl(IVotoServicio):
             db.session.rollback()
             logger.error(f'Error al registrar el voto: {str(e)}')
             raise e
+        
     def get_all_votos(self):
         votos = db.session.query(
             Elector.nombres,
@@ -271,6 +275,7 @@ class ListaServicioImpl(IListaServicio):
             db.session.rollback()
             print(f"Error en la inserción de la propuesta: {e}")
             raise e
+        
     def get_all_eleccion_abiertas(self):
         try:
             all_eleccion = Eleccion.query.filter(Eleccion.estado == "abierto").all()
@@ -345,13 +350,12 @@ class ListaServicioImpl(IListaServicio):
             if lista:
                 lista.estado = EstadoListaEnum.desaprobado.value
             Propuesta.query.filter_by(id_lista=id_lista).update({"denegada": True})
-            Candidato.query.filter_by(id_lista=id_lista).update({"denegado": True})
             db.session.commit()
-            return {"mensaje": "Lista aprobada exitosamente", "id_lista": lista.id_lista}, 200
+            return {"mensaje": "Lista desaprobada exitosamente", "id_lista": lista.id_lista}, 200
         except Exception as e:
             db.session.rollback()
             logger.error(f'Error al aprobar la lista: {str(e)}')
-            return {"mensaje": "Error al aprobar la lista", "error": str(e)}, 500
+            return {"mensaje": "Error al desaprobar la lista", "error": str(e)}, 500
 
     def get_lista_by_id(self, id_lista):
         try:
