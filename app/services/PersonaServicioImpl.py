@@ -16,9 +16,6 @@ class ElectorServiceImpl(ElectorService):
             raise e
 
     def create_elector(self, elector_modelo, contrasena:str):
-        existing_elector = Elector.query.filter_by(correo=elector_modelo.correo).first()
-        if existing_elector:
-            raise ValueError("Ya existe un elector con este correo.")
         elector = Elector(
             nombres=elector_modelo.nombres,
             apellido_paterno=elector_modelo.apellido_paterno,
@@ -37,10 +34,6 @@ class ElectorServiceImpl(ElectorService):
             db.session.rollback()
             logger.error(f'Error al crear el elector: {str(e)}')
             raise ValueError("Error al crear el elector: ya existe un elector con este correo.:")
-        except Exception as e:
-            db.session.rollback()
-            logger.error(f'Error al crear el electbor: {str(e)}')
-            raise e
 
     def update_elector(self, elector: Elector):
         try:

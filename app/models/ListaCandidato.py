@@ -1,17 +1,13 @@
-import enum
-
-from sqlalchemy import Enum
-
 from app import db
-from app import ma
+from sqlalchemy import Enum
 from app.models.Propuesta import Propuesta
 from app.models.Candidato import Candidato
+import enum
 
 class EstadoListaEnum(enum.Enum):
     aprobado = "aprobado"
     desaprobado = "desaprobado"
     pendiente = "pendiente"
-
 
 class ListaCandidato(db.Model):
     __tablename__ = 'lista_candidato'
@@ -19,10 +15,8 @@ class ListaCandidato(db.Model):
     nombre = db.Column(db.String(100), nullable=True)
     estado = db.Column(Enum(EstadoListaEnum), nullable=True, default=EstadoListaEnum.pendiente)
     id_eleccion = db.Column(db.Integer, db.ForeignKey('eleccion.id_eleccion'), nullable=True)
-
-    propuestas = db.relationship('Propuesta', backref='lista_candidato', lazy=True)
-    
-    candidatos = db.relationship('Candidato', backref='lista_candidato', lazy=True)
+    propuestas = db.relationship('Propuesta', backref='listacandidato', lazy=True)
+    candidatos = db.relationship('Candidato', backref='listacandidato', lazy=True)
 
     def __init__(self, nombre, id_eleccion, estado=EstadoListaEnum.pendiente):
         self.nombre = nombre

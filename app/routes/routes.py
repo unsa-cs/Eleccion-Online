@@ -1,6 +1,5 @@
 import logging
 from functools import wraps
-
 from flask import render_template, Blueprint, request, jsonify, session, redirect, url_for, make_response, flash, abort
 from flask_login import login_user, logout_user, login_required, login_manager
 
@@ -14,6 +13,9 @@ from app.models.Elector import Elector
 from app.models.Eleccion import Eleccion
 from app.models.ListaCandidato import ListaCandidato
 from app.models.Candidato import Candidato
+from app.models.Propuesta import Propuesta
+
+from functools import wraps
 from app.services.PersonaServicioImpl import ElectorServiceImpl
 from app.services.EleccionServicioImpl import EleccionServicioImpl
 
@@ -28,7 +30,8 @@ import bcrypt
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-##REGISTER_TEMPLATE = 'register.html'
+REGISTER_TEMPLATE = 'register.html'
+
 LOGIN_ROUTE = 'home_bp.login'
 
 home_bp = Blueprint('home_bp', __name__, template_folder='templates')
@@ -86,7 +89,6 @@ def desaprobar_lista(id_lista):
         logger.error(f'Error al desaprobar la lista: {str(e)}')
         return jsonify({'message': 'Error al desaprobar la lista', 'error': str(e)}), 500
 
-
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -128,11 +130,9 @@ def ver_candidatos():
     result = lista_servicio.get_lista_by_eleccion(id_eleccion)
     return render_template("lista_candidatos.html", data = result)
 
-
 @home_bp.route('/FormularioEleccion', methods=['GET'])
 def agregar_eleccion():
     return render_template("ProcesoVotacion/form_eleccion.html")
-
 
 @home_bp.route('/InsertEleccion', methods=['POST'])
 def insert_eleccion():
@@ -144,7 +144,6 @@ def insert_eleccion():
     eleccion = Eleccion(fecha, hora_inicio, hora_fin, estado, descripcion)
     eleccion_servicio.insert_eleccion(eleccion)
     return url_for('home_bp.listar_elecciones')
-
 
 @home_bp.route('/Votos')
 def ver_votos():
@@ -182,7 +181,6 @@ def resumir_votacion():
     lista = lista_servicio.get_lista_by_id(id_lista)
     return render_template('ProcesoVotacion/resumen.html', data = lista)
 
-
 @home_bp.route('/Votar', methods=['POST'])
 @login_required
 def votar():
@@ -190,7 +188,6 @@ def votar():
     elector = elector_service.get_elector_by_email(session['correo'])
     voto_servicio.votar(id_lista, elector.id)
     return redirect(url_for('home_bp.dashboard'))
-
 
 @home_bp.route('/')
 def index():
@@ -221,7 +218,6 @@ def register():
         mensaje_error = f"Error al crear el elector: {str(e)}"
         logger.error(mensaje_error)
         return render_template(REGISTER_HTML, mensaje=mensaje_error)
-
 
 @home_bp.route('/login', methods=['GET','POST'])
 def login():
@@ -255,7 +251,6 @@ def login():
         logger.error(mensaje_error)
         return render_template(LOGIN_HTML, mensaje=mensaje_error)
 
-
 @home_bp.route('/dashboard')
 @login_required
 def dashboard():
@@ -269,7 +264,6 @@ def dashboard():
     logger.warning('El usuario no ha iniciado sesión')
     return redirect(url_for(LOGIN_ROUTE))
 
-
 @home_bp.route('/logout')
 def logout():
     if 'correo' in session:
@@ -282,7 +276,62 @@ def logout():
 def mostrar_candidatos():
     candidatos_inscritos = candidato_servicio.get_candidatos_inscritos()
 
-    return render_template(
-        'a/candidatos.html',
-        candidatos_inscritos=candidatos_inscritos
-    )
+    return render_template('a/candidatos.html', candidatos_inscritos=candidatos_inscritos)
+
+@home_bp.route('/Inscripcion_cand', methods=['GET'])
+def inscripcion_cand():
+    elecciones=lista_servicio.get_all_eleccion_abiertas()
+    return render_template('inscripcion.html', elecciones=elecciones)
+
+
+
+@home_bp.route('/register_candidates', methods=['POST'])
+def listas():
+    try:
+        nombre_partido = request.form.get('nombre_partido')
+        campana = request.form.get('camapana')
+        
+        lista_candidato = ListaCandidato(nombre=nombre_partido,id_eleccion=campana)
+        lista_servicio.insert_lista_candidato(lista_candidato)
+
+        id_lista = lista_candidato.id_lista
+
+        listpropuestas = []
+        propuestas = request.form.getlist('propuestas[]')
+        for propuesta in propuestas:
+            if propuesta: 
+                nueva_propuesta = Propuesta(
+                    descripcion=propuesta,
+                    id_lista=id_lista
+                )
+                listpropuestas.append(nueva_propuesta)
+                lista_servicio.insert_propuesta(nueva_propuesta)
+        
+        listcandidatos = []
+
+
+        for i in range(4):
+            nombre = request.form.get(f'nombre{i}')
+            apellido_paterno = request.form.get(f'apellido_paterno{i}')
+            apellido_materno = request.form.get(f'apellido_materno{i}')
+            dni = request.form.get(f'dni{i}')
+            
+            rol_ = "asesor" if i != 0 else "presidente"
+            candidato = Candidato(
+                dni=dni,
+                nombres=nombre,
+                apellido_paterno=apellido_paterno,
+                apellido_materno=apellido_materno,
+                rol=rol_,
+                id_lista=id_lista
+
+            )
+            lista_servicio.insert_candidato(candidato)
+            listcandidatos.append(candidato)
+
+
+        flash('Candidatos y propuestas registrados con éxito', 'success')
+    except Exception as e:
+        flash(f'Error al registrar candidatos y propuestas: {str(e)}', 'danger')
+    
+    return render_template('inscripcion.html')

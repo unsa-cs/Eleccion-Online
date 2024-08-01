@@ -13,7 +13,6 @@ class Propuesta(db.Model):
         self.id_lista = id_lista
         self.denegada = denegada
 
-
 class PropuestaSchema(ma.Schema):
     class Meta:
         fields = (

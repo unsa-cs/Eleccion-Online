@@ -1,6 +1,5 @@
-from sqlalchemy import Enum
-
 from app import db
+from sqlalchemy import Enum
 from app import ma
 
 class Eleccion(db.Model):
@@ -18,7 +17,7 @@ class Eleccion(db.Model):
         self.hora_fin = hora_fin
         self.estado = estado
         self.descripcion = descripcion
-        
+
 class EleccionSchema(ma.Schema):
     class Meta:
         fields = (
