@@ -46,6 +46,19 @@
         background-color: #0056b3;
         border-color: #004085;
     }
+    .emitir-regresar{
+        background-color: #596169;
+        border-color: #18191a;
+        color: white;
+        padding: 10px 20px;
+        width: 100%;
+        border-radius: 10px;
+        transition: background-color 0.3s, border-color 0.3s;
+    }
+    .emitir-regresar:hover {
+        background-color: #596169;
+        border-color: #18191a;
+    }
 
 </style>
 {% endblock %}
@@ -77,6 +90,8 @@
             {% endfor %}
             {% if elecciones_restantes != 0 %}
             <button type="submit" class="btn btn-primary emitir-voto">Continuar con la votación</button>
+            <a class="btn btn-primary emitir-voto" href="{{ url_for('home_bp.dashboard') }}" >Ir a Dashboard</a>
+
             {% else %}
             <h5>Usted ya voto en todas las elecciones</h5>
             <a href="{{ url_for('home_bp.dashboard') }}" class="btn btn-primary">Ir a dashboard</a>
