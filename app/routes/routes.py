@@ -213,7 +213,7 @@ def inscripcion_cand():
 def listas():
     try:
         nombre_partido = request.form.get('nombre_partido')
-        campana = request.form.get('campana')
+        campana = request.form.get('camapana')
         
         lista_candidato = ListaCandidato(nombre=nombre_partido,id_eleccion=campana)
         lista_servicio.insert_lista_candidato(lista_candidato)
