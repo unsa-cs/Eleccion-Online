@@ -110,13 +110,7 @@ class EleccionServicioImpl(IEleccionServicio):
             db.session.rollback()
             logger.error(f'Error al insertar la elección: {str(e)}')
             raise e
-    def get_elector_by_email(self, email):
-        try:
-            elector = Elector.query.filter_by(correo=email).first()
-            return elector
-        except Exception as e:
-            logger.error(f'Error al obtener el elector por email: {str(e)}')
-            raise e
+
     def get_elecciones_hechas_por_elector(self, id_elector):
         try:
             elecciones = db.session.query(ListaCandidato.id_eleccion).join(Voto, ListaCandidato.id_lista == Voto.id_lista)\
@@ -126,14 +120,13 @@ class EleccionServicioImpl(IEleccionServicio):
         except Exception as e:
             logger.error(f'Error al obtener las elecciones hechas por el elector: {str(e)}')
             raise e
-        
-    def get_elecciones_hechas_por_elector(self, id_elector):
+    def get_all_elecciones(self):
         try:
-            elecciones = db.session.query(ListaCandidato.id_eleccion).join(Voto, ListaCandidato.id_lista == Voto.id_lista).filter(Voto.id_elector == id_elector).all()
-            result = [tupla[0] for tupla in elecciones]
+            all_eleccion = Eleccion.query.all()
+            result = eleccion_schemas.dump(all_eleccion)
             return result
         except Exception as e:
-            logger.error(f'Error al obtener las elecciones hechas por el elector: {str(e)}')
+            logger.error(f'Error al obtener todas las elecciones: {str(e)}')
             raise e
 
 class VotoServicioImpl(IVotoServicio):
@@ -178,7 +171,7 @@ class VotoServicioImpl(IVotoServicio):
         ]
         return result
     
-    def get_cant_votos_by_eleccion(self, id_eleccion=1):
+    def get_cant_votos_by_eleccion(self, id_eleccion):
         try:
             cant_votos = db.session.query(ListaCandidato.nombre, func.count(Voto.id_voto)) \
                 .join(Voto, ListaCandidato.id_lista == Voto.id_lista) \
@@ -253,6 +246,7 @@ class ListaServicioImpl(IListaServicio):
                 ListaCandidato.id_eleccion == id_eleccion
             ).filter(ListaCandidato.estado == "aprobado").all()
             result = [{"nombre": tupla[0], "id_lista": tupla[1]} for tupla in all_listas]
+            print(result)
             return result
         except Exception as e:
             logger.error(f'Error al obtener las listas por elección: {str(e)}')

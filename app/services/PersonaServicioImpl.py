@@ -62,3 +62,10 @@ class ElectorServiceImpl(ElectorService):
             logger.error(f'Error al eliminar el elector: {str(e)}')
             raise e
         
+    def get_elector_by_email(self, email):
+        try:
+            elector = Elector.query.filter_by(correo=email).first()
+            return elector
+        except Exception as e:
+            logger.error(f'Error al obtener el elector por email: {str(e)}')
+            raise e
